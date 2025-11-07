@@ -251,11 +251,11 @@
                 0 10px 25px rgba(0,0,0,0.1),
                 inset 0 1px 0 rgba(255,255,255,0.2);
             transition: var(--transition);
-            width: 400px;
+            width: 500px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            height: fit-content;
+            height: 80vh;
             max-height: 80vh;
         }
 
@@ -279,6 +279,9 @@
             transition: var(--transition);
             font-weight: 500;
             font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .tab.active {
@@ -287,9 +290,153 @@
             box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
         }
 
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Стили для контейнера жанров */
+        .genres-container {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--glass);
+            flex-shrink: 0;
+        }
+
+        .genres-container::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .genres-container::-webkit-scrollbar-track {
+            background: var(--glass);
+            border-radius: 3px;
+        }
+
+        .genres-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .genre-tab {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .genre-tab:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .genre-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Стили для артистов в поиске */
+        .artist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+
+        .artist-item {
+            background: var(--glass);
+            padding: 1.5rem 1rem;
+            border-radius: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .artist-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+        }
+
+        .artist-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .artist-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .artist-listeners {
+            color: color-mix(in srgb, var(--text) 60%, transparent);
+            font-size: 0.8rem;
+        }
+
+        /* Навигация в поиске */
+        .search-navigation {
+            display: none;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: var(--glass);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-title {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
         .search-container {
             margin-bottom: 1.5rem;
             transition: var(--transition);
+            flex-shrink: 0;
         }
 
         .search-input {
@@ -332,6 +479,27 @@
             font-weight: 400;
         }
 
+        .search-results-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .search-section {
+            margin-bottom: 1rem;
+        }
+
+        .search-section-title {
+            font-weight: 500;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
         .tracks-grid {
             display: flex;
             flex-direction: column;
@@ -343,22 +511,22 @@
         }
 
         .tracks-grid::-webkit-scrollbar {
-            width: 4px;
+            width: 6px;
         }
 
         .tracks-grid::-webkit-scrollbar-track {
             background: var(--glass);
-            border-radius: 2px;
+            border-radius: 3px;
         }
 
         .tracks-grid::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 2px;
+            border-radius: 3px;
         }
 
         .track-item {
             background: var(--glass);
-            padding: 2rem 1rem;
+            padding: 2rem;
             border-radius: 1rem;
             display: flex;
             align-items: center;
@@ -429,6 +597,16 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .track-type {
+            background: var(--primary);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
         }
 
         .track-duration {
@@ -1291,6 +1469,7 @@
                 padding: 1rem;
                 border-radius: 1rem;
                 max-height: none;
+                height: auto;
             }
 
             .vinyl-container {
@@ -1349,6 +1528,24 @@
                 width: 280px;
                 right: -280px;
             }
+
+            .artist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+
+            .genres-container {
+                gap: 0.5rem;
+            }
+
+            .genre-tab {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
@@ -1394,26 +1591,54 @@
         <main class="main-content" id="mainContent">
             <div class="tracks-container">
                 <div class="tabs">
-                    <button class="tab active" data-tab="recent" onclick="switchTab('recent')">Recent</button>
-                    <button class="tab" data-tab="search" onclick="switchTab('search')">Search</button>
+                    <button class="tab active" data-tab="new" onclick="switchTab('new')">Новые релизы</button>
+                    <button class="tab" data-tab="popular" onclick="switchTab('popular')">Популярные</button>
+                    <button class="tab" data-tab="search" onclick="switchTab('search')">Поиск</button>
                 </div>
                 
-                <div class="search-container" id="searchContainer" style="display: none;">
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        placeholder="Search tracks..." 
-                        id="searchInput"
-                    >
+                <!-- Вкладка новых релизов -->
+                <div class="tab-content active" id="newTab">
+                    <div class="genres-container" id="newGenres">
+                        <!-- Жанры будут загружены через JavaScript -->
+                    </div>
+                    <div class="tracks-grid" id="newTracksGrid">
+                        <div class="loading">Загрузка новых релизов...</div>
+                    </div>
                 </div>
-                
-                <div class="tracks-header">
-                    <h2 class="tracks-title" id="tracksTitle">Recent Tracks</h2>
-                    <p class="tracks-subtitle" id="tracksSubtitle">Click on a track to select</p>
+
+                <!-- Вкладка популярных треков -->
+                <div class="tab-content" id="popularTab">
+                    <div class="genres-container" id="popularGenres">
+                        <!-- Жанры будут загружены через JavaScript -->
+                    </div>
+                    <div class="tracks-grid" id="popularTracksGrid">
+                        <div class="loading">Загрузка популярных треков...</div>
+                    </div>
                 </div>
-                
-                <div class="tracks-grid" id="tracksGrid">
-                    <div class="loading">Loading tracks...</div>
+
+                <!-- Вкладка поиска -->
+                <div class="tab-content" id="searchTab">
+                    <div class="search-container">
+                        <input 
+                            type="text" 
+                            class="search-input" 
+                            placeholder="Поиск треков или артистов..." 
+                            id="searchInput"
+                        >
+                    </div>
+                    
+                    <div class="search-navigation" id="searchNav">
+                        <button class="nav-btn" onclick="goBackInSearch()">← Назад</button>
+                        <span class="nav-title" id="searchNavTitle"></span>
+                    </div>
+                    
+                    <div class="genres-container" id="searchGenres">
+                        <!-- Жанры будут загружены через JavaScript -->
+                    </div>
+                    
+                    <div class="search-results-container" id="searchResultsContainer">
+                        <div class="loading">Введите запрос для поиска или выберите жанр</div>
+                    </div>
                 </div>
             </div>
 
@@ -1754,9 +1979,8 @@
         let currentTrack = null;
         let isPlaying = false;
         let tracks = [];
-        let recentTracks = [];
         let searchTimeout = null;
-        let currentTab = 'recent';
+        let currentTab = 'new';
         let currentPage = 'home';
         let currentVinylTab = 'vinyl';
         let lyricsCache = {};
@@ -1770,70 +1994,338 @@
             relevance: 0
         };
 
-        // Загрузка треков
-        async function loadTracks() {
-            const container = document.getElementById('tracksGrid');
-            container.innerHTML = '<div class="loading">Loading tracks...</div>';
-            
+        // Новые переменные для жанров и поиска
+        let currentGenres = {
+            new: 'all',
+            popular: 'all',
+            search: 'all'
+        };
+
+        let searchState = {
+            mode: 'search', // 'search', 'artists', 'tracks'
+            currentGenre: 'all',
+            currentArtist: null
+        };
+
+        // Загрузка жанров
+        async function loadGenres() {
             try {
-                const response = await fetch('/api/tracks');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                tracks = await response.json();
-                recentTracks = [...tracks]; // Сохраняем копию для вкладки Recent
-                displayTracks(tracks);
+                const response = await fetch('/api/genres');
+                const genres = await response.json();
+                
+                // Добавляем опцию "Все жанры"
+                const allGenres = ['all', ...genres];
+                
+                // Создаем элементы жанров для каждой вкладки
+                ['new', 'popular', 'search'].forEach(tab => {
+                    const container = document.getElementById(`${tab}Genres`);
+                    container.innerHTML = '';
+                    
+                    allGenres.forEach(genre => {
+                        const genreElement = document.createElement('button');
+                        genreElement.className = `genre-tab ${currentGenres[tab] === genre ? 'active' : ''}`;
+                        genreElement.textContent = genre === 'all' ? 'Все жанры' : genre;
+                        genreElement.setAttribute('data-genre', genre);
+                        genreElement.addEventListener('click', () => selectGenre(tab, genre));
+                        container.appendChild(genreElement);
+                    });
+                });
             } catch (error) {
-                console.error('Error loading tracks:', error);
-                container.innerHTML = `
-                    <div class="error-message">
-                        Failed to load tracks. Please check if the server is running.
-                    </div>
-                `;
+                console.error('Error loading genres:', error);
             }
         }
 
-        // Поиск треков
-        async function searchTracks(query) {
-            if (!query.trim()) {
-                if (currentTab === 'search') {
-                    document.getElementById('tracksGrid').innerHTML = `
-                        <div class="loading">Enter search query to find tracks</div>
-                    `;
+        // Выбор жанра
+        function selectGenre(tab, genre) {
+            currentGenres[tab] = genre;
+            
+            // Обновляем активные жанры
+            document.querySelectorAll(`#${tab}Genres .genre-tab`).forEach(element => {
+                element.classList.toggle('active', element.getAttribute('data-genre') === genre);
+            });
+            
+            // Загружаем соответствующие треки
+            if (tab === 'new') {
+                loadNewReleases();
+            } else if (tab === 'popular') {
+                loadPopularTracks();
+            } else if (tab === 'search') {
+                // В поиске при выборе жанра показываем артистов этого жанра
+                if (searchState.mode === 'search') {
+                    loadArtistsByGenre(genre);
+                }
+            }
+        }
+
+        // Загрузка новых релизов
+        async function loadNewReleases() {
+            const container = document.getElementById('newTracksGrid');
+            
+            container.innerHTML = '<div class="loading">Загрузка новых релизов...</div>';
+            
+            try {
+                const genre = currentGenres.new === 'all' ? '' : currentGenres.new;
+                const response = await fetch(`/api/tracks/new?genre=${genre}`);
+                const tracks = await response.json();
+                
+                displayTracks(tracks, 'newTracksGrid');
+            } catch (error) {
+                console.error('Error loading new releases:', error);
+                container.innerHTML = '<div class="error-message">Ошибка загрузки новых релизов</div>';
+            }
+        }
+
+        // Загрузка популярных треков
+        async function loadPopularTracks() {
+            const container = document.getElementById('popularTracksGrid');
+            
+            container.innerHTML = '<div class="loading">Загрузка популярных треков...</div>';
+            
+            try {
+                const genre = currentGenres.popular === 'all' ? '' : currentGenres.popular;
+                const response = await fetch(`/api/tracks/popular?genre=${genre}`);
+                const tracks = await response.json();
+                
+                displayTracks(tracks, 'popularTracksGrid');
+            } catch (error) {
+                console.error('Error loading popular tracks:', error);
+                container.innerHTML = '<div class="error-message">Ошибка загрузки популярных треков</div>';
+            }
+        }
+
+        // Расширенный поиск
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const container = document.getElementById('searchResultsContainer');
+            
+            if (!query) {
+                // Если запрос пустой, но выбран жанр - показываем артистов
+                if (currentGenres.search !== 'all') {
+                    loadArtistsByGenre(currentGenres.search);
+                } else {
+                    resetSearch();
                 }
                 return;
             }
             
-            const container = document.getElementById('tracksGrid');
-            container.innerHTML = '<div class="loading">Searching...</div>';
+            container.innerHTML = '<div class="loading">Поиск...</div>';
             
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                tracks = await response.json();
-                displayTracks(tracks);
+                const genre = currentGenres.search === 'all' ? '' : currentGenres.search;
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&genre=${genre}`);
+                const data = await response.json();
+                
+                displaySearchResults(data);
             } catch (error) {
-                console.error('Error searching tracks:', error);
-                container.innerHTML = `
-                    <div class="error-message">
-                        Search failed. Please try again later.
-                    </div>
-                `;
+                console.error('Error searching:', error);
+                container.innerHTML = '<div class="error-message">Ошибка поиска</div>';
             }
         }
 
-        // Отображение треков
-        function displayTracks(tracksToDisplay, containerId = 'tracksGrid') {
-            const container = document.getElementById(containerId);
+        // Отображение результатов поиска
+        function displaySearchResults(data) {
+            const container = document.getElementById('searchResultsContainer');
+            container.innerHTML = '';
             
-            if (!tracksToDisplay || tracksToDisplay.length === 0) {
-                container.innerHTML = '<div class="empty-state">No tracks found</div>';
+            // Скрываем навигацию в обычном поиске
+            document.getElementById('searchNav').style.display = 'none';
+            
+            let hasContent = false;
+            
+            // Отображаем артистов
+            if (data.artists && data.artists.length > 0) {
+                hasContent = true;
+                const artistsSection = document.createElement('div');
+                artistsSection.className = 'search-section';
+                artistsSection.innerHTML = '<div class="search-section-title">Артисты</div>';
+                
+                const artistsGrid = document.createElement('div');
+                artistsGrid.className = 'artist-grid';
+                
+                data.artists.forEach(artist => {
+                    const artistElement = document.createElement('div');
+                    artistElement.className = 'artist-item';
+                    artistElement.innerHTML = `
+                        <img src="${artist.image}" alt="${artist.name}" class="artist-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                        <div class="artist-name">${artist.name}</div>
+                        <div class="artist-listeners">${formatListeners(artist.listeners)} слушателей</div>
+                    `;
+                    
+                    artistElement.addEventListener('click', () => loadArtistTracks(artist.name));
+                    artistsGrid.appendChild(artistElement);
+                });
+                
+                artistsSection.appendChild(artistsGrid);
+                container.appendChild(artistsSection);
+            }
+            
+            // Отображаем треки
+            if (data.tracks && data.tracks.length > 0) {
+                hasContent = true;
+                const tracksSection = document.createElement('div');
+                tracksSection.className = 'search-section';
+                tracksSection.innerHTML = '<div class="search-section-title">Треки</div>';
+                
+                const tracksGrid = document.createElement('div');
+                tracksGrid.className = 'tracks-grid';
+                
+                data.tracks.forEach(track => {
+                    const trackElement = document.createElement('div');
+                    trackElement.className = 'track-item';
+                    trackElement.setAttribute('data-track-id', track.id);
+                    trackElement.innerHTML = `
+                        <img src="${track.image}" 
+                             alt="${track.name}" 
+                             class="track-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                        <div class="track-info">
+                            <div class="track-name">${track.name}</div>
+                            <div class="track-artist">${track.artist}</div>
+                        </div>
+                        <span class="track-type">Трек</span>
+                        <div class="track-duration">${track.duration}</div>
+                    `;
+                    
+                    trackElement.addEventListener('click', () => selectTrack(track));
+                    tracksGrid.appendChild(trackElement);
+                });
+                
+                tracksSection.appendChild(tracksGrid);
+                container.appendChild(tracksSection);
+            }
+            
+            if (!hasContent) {
+                container.innerHTML = '<div class="empty-state">Ничего не найдено</div>';
+            }
+        }
+
+        // Загрузка артистов по жанру
+        async function loadArtistsByGenre(genre) {
+            const container = document.getElementById('searchResultsContainer');
+            
+            container.innerHTML = '<div class="loading">Загрузка артистов...</div>';
+            
+            // Обновляем навигацию
+            document.getElementById('searchNav').style.display = 'flex';
+            document.getElementById('searchNavTitle').textContent = `Жанр: ${genre}`;
+            
+            searchState.mode = 'artists';
+            searchState.currentGenre = genre;
+            
+            try {
+                const response = await fetch(`/api/artists/${genre}`);
+                const artists = await response.json();
+                
+                displayArtists(artists);
+            } catch (error) {
+                console.error('Error loading artists:', error);
+                container.innerHTML = '<div class="error-message">Ошибка загрузки артистов</div>';
+            }
+        }
+
+        // Отображение артистов
+        function displayArtists(artists) {
+            const container = document.getElementById('searchResultsContainer');
+            
+            if (!artists || artists.length === 0) {
+                container.innerHTML = '<div class="empty-state">Артисты не найдены</div>';
                 return;
             }
             
             container.innerHTML = '';
+            
+            const artistsGrid = document.createElement('div');
+            artistsGrid.className = 'artist-grid';
+            
+            artists.forEach(artist => {
+                const artistElement = document.createElement('div');
+                artistElement.className = 'artist-item';
+                artistElement.innerHTML = `
+                    <img src="${artist.image}" alt="${artist.name}" class="artist-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                    <div class="artist-name">${artist.name}</div>
+                    <div class="artist-listeners">${formatListeners(artist.listeners)} слушателей</div>
+                `;
+                
+                artistElement.addEventListener('click', () => loadArtistTracks(artist.name));
+                artistsGrid.appendChild(artistElement);
+            });
+            
+            container.appendChild(artistsGrid);
+        }
+
+        // Загрузка треков артиста
+        async function loadArtistTracks(artistName) {
+            const container = document.getElementById('searchResultsContainer');
+            
+            container.innerHTML = '<div class="loading">Загрузка треков...</div>';
+            
+            // Обновляем навигацию
+            document.getElementById('searchNavTitle').textContent = `Артист: ${artistName}`;
+            
+            searchState.mode = 'tracks';
+            searchState.currentArtist = artistName;
+            
+            try {
+                const response = await fetch(`/api/artist/${encodeURIComponent(artistName)}/tracks`);
+                const tracks = await response.json();
+                
+                displayTracks(tracks, 'searchResultsContainer', true);
+            } catch (error) {
+                console.error('Error loading artist tracks:', error);
+                container.innerHTML = '<div class="error-message">Ошибка загрузки треков артиста</div>';
+            }
+        }
+
+        // Назад в поиске
+        function goBackInSearch() {
+            if (searchState.mode === 'tracks') {
+                // Возвращаемся к артистам
+                loadArtistsByGenre(searchState.currentGenre);
+            } else if (searchState.mode === 'artists') {
+                // Возвращаемся к обычному поиску
+                resetSearch();
+            }
+        }
+
+        // Сброс поиска
+        function resetSearch() {
+            searchState = {
+                mode: 'search',
+                currentGenre: 'all',
+                currentArtist: null
+            };
+            
+            document.getElementById('searchNav').style.display = 'none';
+            document.getElementById('searchResultsContainer').innerHTML = '<div class="loading">Введите запрос для поиска или выберите жанр</div>';
+        }
+
+        // Форматирование количества слушателей
+        function formatListeners(listeners) {
+            const num = parseInt(listeners);
+            if (isNaN(num)) return '0';
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num.toString();
+        }
+
+        // Отображение треков
+        function displayTracks(tracksToDisplay, containerId, showType = false) {
+            const container = document.getElementById(containerId);
+            
+            if (!tracksToDisplay || tracksToDisplay.length === 0) {
+                container.innerHTML = '<div class="empty-state">Треки не найдены</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+
+            const tracksGrid = document.createElement('div');
+            tracksGrid.className = 'tracks-grid';
 
             tracksToDisplay.forEach(track => {
                 const trackElement = document.createElement('div');
@@ -1848,12 +2340,15 @@
                         <div class="track-name">${track.name}</div>
                         <div class="track-artist">${track.artist}</div>
                     </div>
+                    ${showType ? '<span class="track-type">Трек</span>' : ''}
                     <div class="track-duration">${track.duration}</div>
                 `;
                 
                 trackElement.addEventListener('click', () => selectTrack(track));
-                container.appendChild(trackElement);
+                tracksGrid.appendChild(trackElement);
             });
+
+            container.appendChild(tracksGrid);
         }
 
         // Выбор трека
@@ -2305,27 +2800,19 @@
             });
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
-            // Показываем/скрываем поле поиска
-            const searchContainer = document.getElementById('searchContainer');
-            const tracksTitle = document.getElementById('tracksTitle');
-            const tracksSubtitle = document.getElementById('tracksSubtitle');
+            // Показываем/скрываем контент
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
             
-            if (tabName === 'recent') {
-                searchContainer.style.display = 'none';
-                tracksTitle.textContent = 'Recent Tracks';
-                tracksSubtitle.textContent = 'Click on a track to select';
-                // Немедленно показываем recent треки
-                tracks = [...recentTracks];
-                displayTracks(tracks);
-            } else {
-                searchContainer.style.display = 'block';
-                tracksTitle.textContent = 'Search Results';
-                tracksSubtitle.textContent = 'Enter your search query';
-                document.getElementById('tracksGrid').innerHTML = `
-                    <div class="loading">Enter search query to find tracks</div>
-                `;
-                // Очищаем текущие треки при переходе на поиск
-                tracks = [];
+            // Загружаем данные для активной вкладки
+            if (tabName === 'new') {
+                loadNewReleases();
+            } else if (tabName === 'popular') {
+                loadPopularTracks();
+            } else if (tabName === 'search') {
+                resetSearch();
             }
         }
 
@@ -2439,7 +2926,9 @@
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
-                    searchTracks(e.target.value);
+                    if (searchState.mode === 'search') {
+                        performSearch();
+                    }
                 }, 500);
             });
             
@@ -2456,11 +2945,15 @@
             // Инициализируем слайдеры оценки
             initRatingSliders();
             
-            // Загружаем треки
-            loadTracks();
+            // Загружаем жанры
+            loadGenres();
+            
+            // Загружаем начальные данные
+            loadNewReleases();
+            loadPopularTracks();
         }
 
-        // Запуск при загрузке
+        // Запускаем при загрузке
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
