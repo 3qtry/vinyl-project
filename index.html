@@ -2037,7 +2037,6 @@
 
                     <h3>⚙️ Технологии:</h3>
                     <p>Frontend: HTML5, CSS3, JavaScript<br>
-                    Backend: Python Flask<br>
                     API: Last.fm, Genius, Discogs</p>
 
                     <p style="margin-top: 1rem; font-style: italic; color: var(--primary);">
@@ -2112,6 +2111,16 @@
     </div>
 
     <script>
+        // API Keys
+        const LASTFM_API_KEY = "5058e4076992e4688bb4104b252aaed7";
+        const DISCOGS_API_KEY = "lYJnxXhQJsIwBDOmIeAATXrJogYjXikuRUYsJIhR";
+        const GENIUS_API_KEY = "a5ox7Baa789j7qMf5JP8zBRs5qdT5WjkzOL_NRj07Qt8aEr7UZww-NKNZo-lhu-G";
+        const LASTFM_BASE_URL = 'https://ws.audioscrobbler.com/2.0/';
+
+        // CORS Proxy для обхода ограничений браузера
+        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+
+        // Глобальные переменные
         let currentTrack = null;
         let isPlaying = false;
         let tracks = [];
@@ -2132,21 +2141,358 @@
 
         // Переменные для поиска
         let searchState = {
-            mode: 'search', // 'search', 'artist'
+            mode: 'search',
             currentArtist: null,
-            searchType: 'tracks' // 'tracks', 'artists', 'albums', 'recent'
+            searchType: 'tracks'
         };
+
+        // Функция для выполнения запросов с CORS proxy
+        async function fetchWithCors(url, options = {}) {
+            try {
+                const response = await fetch(CORS_PROXY + url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                console.error('CORS proxy error, trying direct fetch:', error);
+                // Если прокси не работает, пробуем прямой запрос
+                return fetch(url, options);
+            }
+        }
+
+        // Last.fm API функции
+        async function lastfmRequest(params) {
+            const searchParams = new URLSearchParams({
+                ...params,
+                api_key: LASTFM_API_KEY,
+                format: 'json'
+            });
+            
+            const url = `${LASTFM_BASE_URL}?${searchParams}`;
+            const response = await fetchWithCors(url);
+            return response.json();
+        }
+
+        // Получение популярных треков
+        async function getPopularTracks(limit = 15) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'chart.gettoptracks',
+                    limit: limit
+                });
+                
+                const tracks = [];
+                if (data.tracks && data.tracks.track) {
+                    for (const track of data.tracks.track) {
+                        const trackInfo = await getTrackInfo(track.artist.name, track.name);
+                        tracks.push({
+                            id: `${track.artist.name}-${track.name}`,
+                            name: track.name,
+                            artist: track.artist.name,
+                            image: getBestImage(track.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            duration: trackInfo.duration,
+                            url: track.url,
+                            listeners: track.listeners || '0',
+                            type: 'track'
+                        });
+                    }
+                }
+                return tracks;
+            } catch (error) {
+                console.error('Error fetching popular tracks:', error);
+                return [];
+            }
+        }
+
+        // Получение новых релизов
+        async function getNewReleases(limit = 15) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'chart.gettoptracks',
+                    limit: limit
+                });
+                
+                const tracks = [];
+                if (data.tracks && data.tracks.track) {
+                    for (const track of data.tracks.track) {
+                        const trackInfo = await getTrackInfo(track.artist.name, track.name);
+                        tracks.push({
+                            id: `${track.artist.name}-${track.name}`,
+                            name: track.name,
+                            artist: track.artist.name,
+                            image: getBestImage(track.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            duration: trackInfo.duration,
+                            url: track.url,
+                            listeners: track.listeners || '0',
+                            type: 'track'
+                        });
+                    }
+                }
+                return tracks;
+            } catch (error) {
+                console.error('Error fetching new releases:', error);
+                return [];
+            }
+        }
+
+        // Поиск треков
+        async function searchTracks(query, limit = 20) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'track.search',
+                    track: query,
+                    limit: limit
+                });
+                
+                const tracks = [];
+                if (data.results && data.results.trackmatches && data.results.trackmatches.track) {
+                    for (const track of data.results.trackmatches.track) {
+                        const trackInfo = await getTrackInfo(track.artist, track.name);
+                        tracks.push({
+                            id: `${track.artist}-${track.name}`,
+                            name: track.name,
+                            artist: track.artist,
+                            image: getBestImage(track.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            duration: trackInfo.duration,
+                            url: track.url,
+                            listeners: track.listeners || '0',
+                            type: 'track'
+                        });
+                    }
+                }
+                return tracks;
+            } catch (error) {
+                console.error('Error searching tracks:', error);
+                return [];
+            }
+        }
+
+        // Поиск артистов
+        async function searchArtists(query, limit = 10) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'artist.search',
+                    artist: query,
+                    limit: limit
+                });
+                
+                const artists = [];
+                if (data.results && data.results.artistmatches && data.results.artistmatches.artist) {
+                    for (const artist of data.results.artistmatches.artist) {
+                        const artistInfo = await getArtistInfo(artist.name);
+                        artists.push({
+                            name: artist.name,
+                            listeners: artistInfo.listeners || '0',
+                            url: artist.url,
+                            image: getBestImage(artist.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            type: 'artist'
+                        });
+                    }
+                }
+                return artists;
+            } catch (error) {
+                console.error('Error searching artists:', error);
+                return [];
+            }
+        }
+
+        // Поиск альбомов
+        async function searchAlbums(query, limit = 10) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'album.search',
+                    album: query,
+                    limit: limit
+                });
+                
+                const albums = [];
+                if (data.results && data.results.albummatches && data.results.albummatches.album) {
+                    for (const album of data.results.albummatches.album) {
+                        albums.push({
+                            name: album.name,
+                            artist: album.artist,
+                            url: album.url,
+                            image: getBestImage(album.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            type: 'album'
+                        });
+                    }
+                }
+                return albums;
+            } catch (error) {
+                console.error('Error searching albums:', error);
+                return [];
+            }
+        }
+
+        // Получение треков артиста
+        async function getArtistTracks(artist, limit = 15) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'artist.gettoptracks',
+                    artist: artist,
+                    limit: limit
+                });
+                
+                const tracks = [];
+                if (data.toptracks && data.toptracks.track) {
+                    for (const track of data.toptracks.track) {
+                        const trackInfo = await getTrackInfo(artist, track.name);
+                        tracks.push({
+                            id: `${artist}-${track.name}`,
+                            name: track.name,
+                            artist: artist,
+                            image: getBestImage(track.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            duration: trackInfo.duration,
+                            url: track.url,
+                            listeners: track.listeners || '0',
+                            type: 'track'
+                        });
+                    }
+                }
+                return tracks;
+            } catch (error) {
+                console.error('Error fetching artist tracks:', error);
+                return [];
+            }
+        }
+
+        // Получение альбомов артиста
+        async function getArtistAlbums(artist, limit = 10) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'artist.gettopalbums',
+                    artist: artist,
+                    limit: limit
+                });
+                
+                const albums = [];
+                if (data.topalbums && data.topalbums.album) {
+                    for (const album of data.topalbums.album) {
+                        albums.push({
+                            name: album.name,
+                            artist: artist,
+                            url: album.url,
+                            image: getBestImage(album.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                            playcount: album.playcount || '0',
+                            type: 'album'
+                        });
+                    }
+                }
+                return albums;
+            } catch (error) {
+                console.error('Error fetching artist albums:', error);
+                return [];
+            }
+        }
+
+        // Получение информации об артисте
+        async function getArtistInfo(artist) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'artist.getInfo',
+                    artist: artist
+                });
+                
+                if (data.artist) {
+                    return {
+                        name: data.artist.name || artist,
+                        listeners: data.artist.stats?.listeners || '0',
+                        playcount: data.artist.stats?.playcount || '0',
+                        bio: data.artist.bio?.summary || '',
+                        image: getBestImage(data.artist.image) || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                        tags: data.artist.tags?.tag?.map(tag => tag.name) || []
+                    };
+                }
+            } catch (error) {
+                console.error('Error fetching artist info:', error);
+            }
+            
+            return {
+                name: artist,
+                listeners: '0',
+                playcount: '0',
+                bio: '',
+                image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+                tags: []
+            };
+        }
+
+        // Получение информации о треке
+        async function getTrackInfo(artist, track) {
+            try {
+                const data = await lastfmRequest({
+                    method: 'track.getInfo',
+                    artist: artist,
+                    track: track
+                });
+                
+                if (data.track) {
+                    let duration = '3:45';
+                    if (data.track.duration && data.track.duration !== '0') {
+                        const minutes = Math.floor(parseInt(data.track.duration) / 60000);
+                        const seconds = Math.floor((parseInt(data.track.duration) % 60000) / 1000);
+                        duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                    
+                    return {
+                        duration: duration,
+                        url: data.track.url || '#'
+                    };
+                }
+            } catch (error) {
+                console.error('Error fetching track info:', error);
+            }
+            
+            return { duration: '3:45', url: '#' };
+        }
+
+        // Получение лучшего изображения из массива
+        function getBestImage(images) {
+            if (!images || !Array.isArray(images)) return null;
+            
+            // Ищем изображение самого высокого качества (последний элемент в массиве)
+            for (let i = images.length - 1; i >= 0; i--) {
+                if (images[i] && images[i]['#text']) {
+                    return images[i]['#text'];
+                }
+            }
+            return null;
+        }
+
+        // Получение текста песни через Genius API
+        async function getLyrics(artist, title) {
+            try {
+                const searchUrl = `https://api.genius.com/search?q=${encodeURIComponent(artist)} ${encodeURIComponent(title)}`;
+                const response = await fetchWithCors(searchUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${GENIUS_API_KEY}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.response && data.response.hits && data.response.hits.length > 0) {
+                    const song = data.response.hits[0].result;
+                    // Для получения полного текста нужно делать дополнительный запрос
+                    // Но для простоты вернем информацию о песне
+                    return `Lyrics for "${song.title}" by ${song.primary_artist.name} are available on Genius.\n\nVisit: ${song.url}`;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error fetching lyrics:', error);
+                return null;
+            }
+        }
 
         // Загрузка новых релизов
         async function loadNewReleases() {
             const container = document.getElementById('newTracksGrid');
-            
             container.innerHTML = '<div class="loading">Загрузка новых релизов...</div>';
             
             try {
-                const response = await fetch(`/api/tracks/new`);
-                const tracks = await response.json();
-                
+                const tracks = await getNewReleases();
                 displayTracks(tracks, 'newTracksGrid');
             } catch (error) {
                 console.error('Error loading new releases:', error);
@@ -2157,13 +2503,10 @@
         // Загрузка популярных треков
         async function loadPopularTracks() {
             const container = document.getElementById('popularTracksGrid');
-            
             container.innerHTML = '<div class="loading">Загрузка популярных треков...</div>';
             
             try {
-                const response = await fetch(`/api/tracks/popular`);
-                const tracks = await response.json();
-                
+                const tracks = await getPopularTracks();
                 displayTracks(tracks, 'popularTracksGrid');
             } catch (error) {
                 console.error('Error loading popular tracks:', error);
@@ -2175,12 +2518,10 @@
         function setSearchType(type) {
             searchState.searchType = type;
             
-            // Обновляем активные фильтры
             document.querySelectorAll('#searchFilters .search-filter').forEach(filter => {
                 filter.classList.toggle('active', filter.getAttribute('data-type') === type);
             });
             
-            // Выполняем поиск если есть запрос
             const query = document.getElementById('searchInput').value.trim();
             if (query) {
                 performSearch();
@@ -2200,8 +2541,21 @@
             container.innerHTML = '<div class="loading">Поиск...</div>';
             
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${searchState.searchType}`);
-                const results = await response.json();
+                let results = [];
+                switch (searchState.searchType) {
+                    case 'tracks':
+                        results = await searchTracks(query);
+                        break;
+                    case 'artists':
+                        results = await searchArtists(query);
+                        break;
+                    case 'albums':
+                        results = await searchAlbums(query);
+                        break;
+                    case 'recent':
+                        results = await getArtistTracks(query);
+                        break;
+                }
                 
                 displaySearchResults(results);
             } catch (error) {
@@ -2215,7 +2569,6 @@
             const container = document.getElementById('searchResultsContainer');
             container.innerHTML = '';
             
-            // Скрываем навигацию в обычном поиске
             document.getElementById('searchNav').style.display = 'none';
             
             if (!results || results.length === 0) {
@@ -2223,14 +2576,12 @@
                 return;
             }
             
-            if (searchState.searchType === 'tracks') {
+            if (searchState.searchType === 'tracks' || searchState.searchType === 'recent') {
                 displayTracks(results, 'searchResultsContainer', true);
             } else if (searchState.searchType === 'artists') {
                 displayArtists(results);
             } else if (searchState.searchType === 'albums') {
                 displayAlbums(results);
-            } else if (searchState.searchType === 'recent') {
-                displayTracks(results, 'searchResultsContainer', true);
             }
         }
 
@@ -2295,10 +2646,8 @@
         // Загрузка детальной информации об артисте
         async function loadArtistDetails(artistName) {
             const container = document.getElementById('searchResultsContainer');
-            
             container.innerHTML = '<div class="loading">Загрузка информации об артисте...</div>';
             
-            // Обновляем навигацию
             document.getElementById('searchNav').style.display = 'flex';
             document.getElementById('searchNavTitle').textContent = `Артист: ${artistName}`;
             
@@ -2306,16 +2655,11 @@
             searchState.currentArtist = artistName;
             
             try {
-                // Загружаем информацию об артисте
-                const [infoResponse, tracksResponse, albumsResponse] = await Promise.all([
-                    fetch(`/api/artist/${encodeURIComponent(artistName)}/info`),
-                    fetch(`/api/artist/${encodeURIComponent(artistName)}/tracks`),
-                    fetch(`/api/artist/${encodeURIComponent(artistName)}/albums`)
+                const [info, tracks, albums] = await Promise.all([
+                    getArtistInfo(artistName),
+                    getArtistTracks(artistName),
+                    getArtistAlbums(artistName)
                 ]);
-                
-                const info = await infoResponse.json();
-                const tracks = await tracksResponse.json();
-                const albums = await albumsResponse.json();
                 
                 displayArtistDetails(info, tracks, albums);
             } catch (error) {
@@ -2360,7 +2704,6 @@
                 </div>
             `;
             
-            // Добавляем популярные треки
             if (tracks && tracks.length > 0) {
                 html += `
                     <div class="search-section">
@@ -2370,7 +2713,6 @@
                 `;
             }
             
-            // Добавляем альбомы
             if (albums && albums.length > 0) {
                 html += `
                     <div class="search-section">
@@ -2382,7 +2724,6 @@
             
             container.innerHTML = html;
             
-            // Отображаем треки и альбомы
             if (tracks && tracks.length > 0) {
                 displayTracks(tracks, 'artistTracksGrid', true);
             }
@@ -2407,7 +2748,6 @@
         // Назад в поиске
         function goBackInSearch() {
             if (searchState.mode === 'artist') {
-                // Возвращаемся к обычному поиску
                 resetSearch();
             }
         }
@@ -2422,8 +2762,6 @@
             
             document.getElementById('searchNav').style.display = 'none';
             document.getElementById('searchResultsContainer').innerHTML = '<div class="loading">Введите запрос для поиска</div>';
-            
-            // Сбрасываем фильтры
             setSearchType('tracks');
         }
 
@@ -2479,12 +2817,10 @@
 
         // Выбор трека
         function selectTrack(track) {
-            // Убираем активный класс со всех треков
             document.querySelectorAll('.track-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            // Добавляем активный класс к выбранному треку
             const selectedElement = document.querySelector(`[data-track-id="${track.id}"]`);
             if (selectedElement) {
                 selectedElement.classList.add('active');
@@ -2492,7 +2828,6 @@
 
             currentTrack = track;
             
-            // Обновляем информацию на пластинке
             const vinylImage = document.getElementById('vinylImage');
             const nowPlayingName = document.getElementById('nowPlayingName');
             const nowPlayingArtist = document.getElementById('nowPlayingArtist');
@@ -2509,28 +2844,20 @@
             ratingTrackName.textContent = track.name;
             ratingTrackArtist.textContent = track.artist;
             
-            // Активируем layout с пластинкой
             const mainContent = document.getElementById('mainContent');
             mainContent.classList.add('with-vinyl');
             
-            // Сбрасываем прогресс-бар
             resetProgressBar();
-            
-            // Устанавливаем общее время трека
             setTotalTime(track.duration);
             
-            // Останавливаем воспроизведение при смене трека
             if (isPlaying) {
                 togglePlay();
             }
             
-            // Добавляем в историю прослушивания
             addToHistory(track);
             
-            // Сбрасываем текст песни при смене трека
             document.getElementById('lyricsContainer').innerHTML = '<div class="lyrics-loading">Loading lyrics...</div>';
             
-            // Если активна вкладка с текстом, загружаем текст
             if (currentVinylTab === 'lyrics') {
                 loadLyrics(track);
             }
@@ -2548,7 +2875,6 @@
                     return;
                 }
             }
-            // Если длительность не указана, устанавливаем по умолчанию 3:30
             totalTime = 210;
             document.getElementById('totalTime').textContent = '3:30';
         }
@@ -2568,13 +2894,11 @@
                 const progress = (currentTime / totalTime) * 100;
                 document.getElementById('progress').style.width = `${progress}%`;
                 
-                // Форматируем время для отображения
                 const minutes = Math.floor(currentTime / 60);
                 const seconds = currentTime % 60;
                 document.getElementById('currentTime').textContent = 
                     `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             } else if (currentTime >= totalTime) {
-                // Трек закончился
                 togglePlay();
                 resetProgressBar();
             }
@@ -2583,19 +2907,11 @@
         // Добавление в историю прослушивания
         function addToHistory(track) {
             let history = JSON.parse(localStorage.getItem('playlistHistory') || '[]');
-            
-            // Удаляем трек если уже есть (чтобы не дублировать)
             history = history.filter(item => item.id !== track.id);
-            
-            // Добавляем в начало
             history.unshift(track);
-            
-            // Ограничиваем историю 20 треками
             history = history.slice(0, 20);
-            
             localStorage.setItem('playlistHistory', JSON.stringify(history));
             
-            // Обновляем отображение истории если на странице плейлиста
             if (currentPage === 'playlist') {
                 loadHistory();
             }
@@ -2609,20 +2925,15 @@
             }
             
             let playlist = JSON.parse(localStorage.getItem('userPlaylist') || '[]');
-            
-            // Проверяем, нет ли уже этого трека в плейлисте
             if (playlist.find(item => item.id === currentTrack.id)) {
                 alert('This track is already in your playlist');
                 return;
             }
             
-            // Добавляем трек
             playlist.push(currentTrack);
             localStorage.setItem('userPlaylist', JSON.stringify(playlist));
-            
             alert('Track added to your playlist!');
             
-            // Обновляем отображение плейлиста если на странице плейлиста
             if (currentPage === 'playlist') {
                 loadPlaylist();
             }
@@ -2644,23 +2955,16 @@
         async function loadLyrics(track) {
             const container = document.getElementById('lyricsContainer');
             
-            // Проверяем кэш
             if (lyricsCache[track.id]) {
                 displayLyrics(lyricsCache[track.id]);
                 return;
             }
             
             try {
-                // Пытаемся получить текст с Genius API через бэкенд
-                const response = await fetch(`/api/lyrics?artist=${encodeURIComponent(track.artist)}&title=${encodeURIComponent(track.name)}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                
-                if (data.lyrics) {
-                    lyricsCache[track.id] = data.lyrics;
-                    displayLyrics(data.lyrics);
+                const lyrics = await getLyrics(track.artist, track.name);
+                if (lyrics) {
+                    lyricsCache[track.id] = lyrics;
+                    displayLyrics(lyrics);
                 } else {
                     container.innerHTML = `
                         <div class="lyrics-error">
@@ -2691,7 +2995,6 @@
                 return;
             }
             
-            // Разбиваем текст на строки и форматируем
             const lines = lyrics.split('\n');
             let html = '';
             
@@ -2712,7 +3015,6 @@
             const playIcon = document.getElementById('playIcon');
             
             if (!currentTrack) {
-                // Если трек не выбран, выбираем первый
                 if (tracks.length > 0) {
                     selectTrack(tracks[0]);
                 }
@@ -2724,12 +3026,10 @@
             if (isPlaying) {
                 vinyl.classList.add('playing');
                 playIcon.textContent = '❚❚';
-                // Запускаем прогресс-бар
                 progressInterval = setInterval(updateProgressBar, 1000);
             } else {
                 vinyl.classList.remove('playing');
                 playIcon.textContent = '▶';
-                // Останавливаем прогресс-бар
                 clearInterval(progressInterval);
             }
         }
@@ -2749,7 +3049,6 @@
                 
                 function updateSlider(value) {
                     const percentage = (value / 25) * 100;
-                    
                     thumb.style.left = `${percentage}%`;
                     fill.style.width = `${percentage}%`;
                     valueDisplay.textContent = value;
@@ -2764,12 +3063,10 @@
                 
                 function handleMouseMove(e) {
                     if (!isDragging) return;
-                    
                     const rect = track.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
                     const value = Math.round((percentage / 100) * 25);
-                    
                     updateSlider(value);
                 }
                 
@@ -2784,14 +3081,11 @@
                     const x = e.clientX - rect.left;
                     const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
                     const value = Math.round((percentage / 100) * 25);
-                    
                     updateSlider(value);
                 }
                 
                 thumb.addEventListener('mousedown', handleMouseDown);
                 track.addEventListener('click', handleClick);
-                
-                // Инициализируем значения по умолчанию
                 updateSlider(0);
             });
         }
@@ -2806,7 +3100,6 @@
             const review = document.getElementById('reviewText').value;
             const total = Object.values(ratingValues).reduce((sum, value) => sum + value, 0);
             
-            // Обновляем модальное окно
             document.getElementById('modalFreshness').textContent = `${ratingValues.freshness}/25`;
             document.getElementById('modalRhythm').textContent = `${ratingValues.rhythm}/25`;
             document.getElementById('modalSound').textContent = `${ratingValues.sound}/25`;
@@ -2814,7 +3107,6 @@
             document.getElementById('modalTotal').textContent = total;
             document.getElementById('modalReview').textContent = review || 'Нет рецензии';
             
-            // Показываем модальное окно
             document.getElementById('ratingModal').classList.add('active');
         }
 
@@ -2830,7 +3122,6 @@
             const review = document.getElementById('reviewText').value;
             const total = Object.values(ratingValues).reduce((sum, value) => sum + value, 0);
             
-            // Сохраняем оценку
             const rating = {
                 trackId: currentTrack.id,
                 trackName: currentTrack.name,
@@ -2846,22 +3137,15 @@
             userRatings.push(rating);
             localStorage.setItem('userRatings', JSON.stringify(userRatings));
             
-            // Закрываем модальное окно
             closeRatingModal();
-            
-            // Сбрасываем форму
             document.getElementById('reviewText').value = '';
             Object.keys(ratingValues).forEach(key => {
                 ratingValues[key] = 0;
             });
             
-            // Обновляем слайдеры
             initRatingSliders();
-            
-            // Показываем уведомление
             alert('Оценка сохранена!');
             
-            // Обновляем страницу оценок если она активна
             if (currentPage === 'ratings') {
                 loadRatings();
             }
@@ -2920,19 +3204,16 @@
         function switchTab(tabName) {
             currentTab = tabName;
             
-            // Обновляем активные вкладки
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
-            // Показываем/скрываем контент
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(tabName + 'Tab').classList.add('active');
             
-            // Загружаем данные для активной вкладки
             if (tabName === 'new') {
                 loadNewReleases();
             } else if (tabName === 'popular') {
@@ -2946,19 +3227,16 @@
         function switchVinylTab(tabName) {
             currentVinylTab = tabName;
             
-            // Обновляем активные вкладки
             document.querySelectorAll('.vinyl-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
             
-            // Показываем/скрываем контент
             document.querySelectorAll('.vinyl-tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(tabName + 'Tab').classList.add('active');
             
-            // Если переключились на вкладку с текстом и есть текущий трек, загружаем текст
             if (tabName === 'lyrics' && currentTrack) {
                 loadLyrics(currentTrack);
             }
@@ -2968,19 +3246,16 @@
         function switchPage(pageName) {
             currentPage = pageName;
             
-            // Скрываем все страницы
             document.querySelectorAll('.page-content').forEach(page => {
                 page.classList.remove('active');
             });
             document.getElementById('mainContent').style.display = 'none';
             
-            // Показываем выбранную страницу
             if (pageName === 'home') {
                 document.getElementById('mainContent').style.display = 'flex';
             } else {
                 document.getElementById(pageName + 'Page').classList.add('active');
                 
-                // Загружаем данные для страницы если необходимо
                 if (pageName === 'playlist') {
                     loadHistory();
                     loadPlaylist();
@@ -2989,13 +3264,11 @@
                 }
             }
             
-            // Обновляем активные пункты меню
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
             document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
             
-            // Закрываем боковое меню
             toggleSidebar(false);
         }
 
@@ -3028,26 +3301,18 @@
             const currentTheme = document.body.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             document.body.setAttribute('data-theme', newTheme);
-            
-            // Сохраняем тему в localStorage
             localStorage.setItem('theme', newTheme);
-            
-            // Обновляем иконку темы
             const themeIcon = document.querySelector('.theme-icon');
             themeIcon.textContent = newTheme === 'light' ? '🌙' : '☀️';
         }
 
         // Инициализация
         function init() {
-            // Загружаем сохраненную тему
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.body.setAttribute('data-theme', savedTheme);
-            
-            // Обновляем иконку темы
             const themeIcon = document.querySelector('.theme-icon');
             themeIcon.textContent = savedTheme === 'light' ? '🌙' : '☀️';
             
-            // Настраиваем поиск
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchTimeout);
@@ -3058,20 +3323,15 @@
                 }, 500);
             });
             
-            // Закрываем боковое меню при клике вне его
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('sidebar');
                 const menuToggle = document.querySelector('.menu-toggle');
-                
                 if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                     sidebar.classList.remove('active');
                 }
             });
             
-            // Инициализируем слайдеры оценки
             initRatingSliders();
-            
-            // Загружаем начальные данные
             loadNewReleases();
             loadPopularTracks();
         }
