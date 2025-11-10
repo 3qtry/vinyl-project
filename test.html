@@ -301,6 +301,7 @@
             display: flex;
         }
 
+        /* Стили для фильтров поиска */
         .search-filters {
             display: flex;
             gap: 0.75rem;
@@ -352,6 +353,7 @@
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
+        /* Стили для артистов в поиске */
         .artist-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -400,6 +402,7 @@
             font-size: 0.8rem;
         }
 
+        /* Стили для карточки артиста */
         .artist-card {
             background: var(--card);
             backdrop-filter: blur(20px);
@@ -490,6 +493,7 @@
             background: linear-gradient(transparent, var(--card));
         }
 
+        /* Стили для альбомов */
         .albums-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -541,6 +545,7 @@
             margin-top: 0.5rem;
         }
 
+        /* Навигация в поиске */
         .search-navigation {
             display: none;
             gap: 0.75rem;
@@ -978,6 +983,7 @@
             font-weight: 400;
         }
 
+        /* Прогресс-бар */
         .progress-container {
             width: 100%;
             margin: 1rem 0;
@@ -1009,6 +1015,7 @@
             margin-top: 0.5rem;
         }
 
+        /* Стили для текста песни */
         .lyrics-container {
             max-height: 400px;
             overflow-y: auto;
@@ -1059,6 +1066,7 @@
             border-radius: 0.75rem;
         }
 
+        /* Стили для оценки трека */
         .rating-form {
             width: 100%;
             display: flex;
@@ -1087,6 +1095,7 @@
             text-align: right;
         }
 
+        /* Стили для горизонтальных ползунков в стиле микшерного пульта */
         .slider-container {
             position: relative;
             height: 60px;
@@ -1251,6 +1260,7 @@
             box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
         }
 
+        /* Модальное окно */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -1355,6 +1365,7 @@
             font-style: italic;
         }
 
+        /* Стили для других страниц */
         .page-content {
             flex: 1;
             padding: 2rem;
@@ -1406,6 +1417,7 @@
             font-size: 0.9rem;
         }
 
+        /* Новый стиль для плейлиста с горизонтальным расположением */
         .playlist-layout {
             display: flex;
             gap: 2rem;
@@ -2100,12 +2112,6 @@
     </div>
 
     <script>
-        // API ключи
-        const LASTFM_API_KEY = "db2558b6b29cea4b64b07193610a82e1";
-        const GENIUS_API_KEY = "B-nxL4rAb8qsAlj9M05KlcM0nKUgxOOqCjkoaRb0PwJDzrBN8Rz-DzXv8QJaxyj8";
-        const LASTFM_BASE_URL = 'https://ws.audioscrobbler.com/2.0/';
-        const GENIUS_BASE_URL = 'https://api.genius.com';
-
         let currentTrack = null;
         let isPlaying = false;
         let tracks = [];
@@ -2131,373 +2137,6 @@
             searchType: 'tracks' // 'tracks', 'artists', 'albums', 'recent'
         };
 
-        // Функции для работы с Last.fm API
-        async function lastfmRequest(params) {
-            const queryParams = new URLSearchParams({
-                ...params,
-                api_key: LASTFM_API_KEY,
-                format: 'json'
-            });
-            
-            try {
-                const response = await fetch(`${LASTFM_BASE_URL}?${queryParams}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Last.fm API error:', error);
-                throw error;
-            }
-        }
-
-        // Получаем популярные треки
-        async function getPopularTracks(limit = 15) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'chart.gettoptracks',
-                    limit: limit
-                });
-                
-                const tracks = [];
-                if (data.tracks && data.tracks.track) {
-                    for (const track of data.tracks.track) {
-                        const trackInfo = await getTrackInfo(track.artist.name, track.name);
-                        
-                        tracks.push({
-                            id: `${track.artist.name}-${track.name}`,
-                            name: track.name,
-                            artist: track.artist.name,
-                            image: getBestImage(track.image),
-                            duration: trackInfo.duration || '3:45',
-                            url: trackInfo.url || '#',
-                            listeners: track.listeners || '0',
-                            type: 'track'
-                        });
-                    }
-                }
-                return tracks;
-            } catch (error) {
-                console.error('Error fetching popular tracks:', error);
-                return [];
-            }
-        }
-
-        // Получаем новые релизы
-        async function getNewReleases(limit = 15) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'chart.gettoptracks',
-                    limit: limit
-                });
-                
-                const tracks = [];
-                if (data.tracks && data.tracks.track) {
-                    for (const track of data.tracks.track) {
-                        const trackInfo = await getTrackInfo(track.artist.name, track.name);
-                        
-                        tracks.push({
-                            id: `${track.artist.name}-${track.name}`,
-                            name: track.name,
-                            artist: track.artist.name,
-                            image: getBestImage(track.image),
-                            duration: trackInfo.duration || '3:45',
-                            url: trackInfo.url || '#',
-                            listeners: track.listeners || '0',
-                            type: 'track'
-                        });
-                    }
-                }
-                return tracks;
-            } catch (error) {
-                console.error('Error fetching new releases:', error);
-                return [];
-            }
-        }
-
-        // Поиск треков
-        async function searchTracks(query, limit = 20) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'track.search',
-                    track: query,
-                    limit: limit
-                });
-                
-                const tracks = [];
-                if (data.results && data.results.trackmatches && data.results.trackmatches.track) {
-                    for (const track of data.results.trackmatches.track) {
-                        const trackInfo = await getTrackInfo(track.artist, track.name);
-                        
-                        tracks.push({
-                            id: `${track.artist}-${track.name}`,
-                            name: track.name,
-                            artist: track.artist,
-                            image: getBestImage(track.image),
-                            duration: trackInfo.duration || '3:45',
-                            url: track.url || '#',
-                            listeners: track.listeners || '0',
-                            type: 'track'
-                        });
-                    }
-                }
-                return tracks;
-            } catch (error) {
-                console.error('Error searching tracks:', error);
-                return [];
-            }
-        }
-
-        // Поиск артистов
-        async function searchArtists(query, limit = 10) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'artist.search',
-                    artist: query,
-                    limit: limit
-                });
-                
-                const artists = [];
-                if (data.results && data.results.artistmatches && data.results.artistmatches.artist) {
-                    for (const artist of data.results.artistmatches.artist) {
-                        const artistInfo = await getArtistInfo(artist.name);
-                        
-                        artists.push({
-                            name: artist.name,
-                            listeners: artistInfo.listeners || '0',
-                            url: artist.url || '#',
-                            image: getBestImage(artist.image),
-                            type: 'artist'
-                        });
-                    }
-                }
-                return artists;
-            } catch (error) {
-                console.error('Error searching artists:', error);
-                return [];
-            }
-        }
-
-        // Поиск альбомов
-        async function searchAlbums(query, limit = 10) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'album.search',
-                    album: query,
-                    limit: limit
-                });
-                
-                const albums = [];
-                if (data.results && data.results.albummatches && data.results.albummatches.album) {
-                    for (const album of data.results.albummatches.album) {
-                        albums.push({
-                            name: album.name,
-                            artist: album.artist,
-                            url: album.url || '#',
-                            image: getBestImage(album.image),
-                            type: 'album'
-                        });
-                    }
-                }
-                return albums;
-            } catch (error) {
-                console.error('Error searching albums:', error);
-                return [];
-            }
-        }
-
-        // Получаем последние треки артиста
-        async function getRecentTracks(artist, limit = 10) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'artist.gettoptracks',
-                    artist: artist,
-                    limit: limit
-                });
-                
-                const tracks = [];
-                if (data.toptracks && data.toptracks.track) {
-                    for (const track of data.toptracks.track) {
-                        const trackInfo = await getTrackInfo(artist, track.name);
-                        
-                        tracks.push({
-                            id: `${artist}-${track.name}`,
-                            name: track.name,
-                            artist: artist,
-                            image: getBestImage(track.image),
-                            duration: trackInfo.duration || '3:45',
-                            url: track.url || '#',
-                            listeners: track.listeners || '0',
-                            type: 'track'
-                        });
-                    }
-                }
-                return tracks;
-            } catch (error) {
-                console.error('Error fetching recent tracks:', error);
-                return [];
-            }
-        }
-
-        // Получаем альбомы артиста
-        async function getArtistAlbums(artist, limit = 10) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'artist.gettopalbums',
-                    artist: artist,
-                    limit: limit
-                });
-                
-                const albums = [];
-                if (data.topalbums && data.topalbums.album) {
-                    for (const album of data.topalbums.album) {
-                        albums.push({
-                            name: album.name,
-                            artist: artist,
-                            url: album.url || '#',
-                            image: getBestImage(album.image),
-                            playcount: album.playcount || '0',
-                            type: 'album'
-                        });
-                    }
-                }
-                return albums;
-            } catch (error) {
-                console.error('Error fetching artist albums:', error);
-                return [];
-            }
-        }
-
-        // Получаем информацию об артисте
-        async function getArtistInfo(artist) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'artist.getInfo',
-                    artist: artist
-                });
-                
-                if (data.artist) {
-                    const artistData = data.artist;
-                    return {
-                        name: artistData.name || '',
-                        listeners: artistData.stats?.listeners || '0',
-                        playcount: artistData.stats?.playcount || '0',
-                        bio: artistData.bio?.summary || '',
-                        image: getBestImage(artistData.image),
-                        tags: artistData.tags?.tag ? artistData.tags.tag.map(tag => tag.name).slice(0, 5) : []
-                    };
-                }
-            } catch (error) {
-                console.error(`Error fetching artist info for ${artist}:`, error);
-            }
-            
-            return {
-                name: artist,
-                listeners: '0',
-                playcount: '0',
-                bio: '',
-                image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
-                tags: []
-            };
-        }
-
-        // Получаем информацию о треке
-        async function getTrackInfo(artist, track) {
-            try {
-                const data = await lastfmRequest({
-                    method: 'track.getInfo',
-                    artist: artist,
-                    track: track
-                });
-                
-                if (data.track) {
-                    let duration = data.track.duration || '-';
-                    if (duration !== '-') {
-                        const minutes = Math.floor(parseInt(duration) / 60000);
-                        const seconds = Math.floor((parseInt(duration) % 60000) / 1000);
-                        duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    }
-                    return {
-                        duration: duration,
-                        url: data.track.url || '#'
-                    };
-                }
-            } catch (error) {
-                console.error(`Error fetching track info for ${artist} - ${track}:`, error);
-            }
-            
-            return { duration: '3:45', url: '#' };
-        }
-
-        // Получаем текст песни с Genius API
-        async function getLyrics(artist, title) {
-            if (!GENIUS_API_KEY || GENIUS_API_KEY === "YOUR_GENIUS_API_KEY") {
-                return null;
-            }
-            
-            try {
-                // Поиск песни
-                const searchResponse = await fetch(`${GENIUS_BASE_URL}/search?q=${encodeURIComponent(artist + ' ' + title)}`, {
-                    headers: {
-                        'Authorization': `Bearer ${GENIUS_API_KEY}`
-                    }
-                });
-                
-                if (!searchResponse.ok) {
-                    throw new Error(`Genius API error: ${searchResponse.status}`);
-                }
-                
-                const searchData = await searchResponse.json();
-                
-                if (searchData.response.hits.length === 0) {
-                    return null;
-                }
-                
-                // Получаем ID первой найденной песни
-                const songId = searchData.response.hits[0].result.id;
-                
-                // Получаем информацию о песне (включая текст)
-                const songResponse = await fetch(`${GENIUS_BASE_URL}/songs/${songId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${GENIUS_API_KEY}`
-                    }
-                });
-                
-                if (!songResponse.ok) {
-                    throw new Error(`Genius API error: ${songResponse.status}`);
-                }
-                
-                const songData = await songResponse.json();
-                
-                // Текст песни доступен в songData.response.song.description или через отдельный endpoint
-                // В реальном приложении нужно использовать правильный endpoint для получения текста
-                return songData.response.song.description || 'Lyrics not available';
-            } catch (error) {
-                console.error('Error fetching lyrics:', error);
-                return null;
-            }
-        }
-
-        // Вспомогательная функция для получения лучшего изображения
-        function getBestImage(images) {
-            if (!images) return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300';
-            
-            // Last.fm возвращает массив изображений разного размера
-            // Ищем изображение самого большого размера
-            const imageSizes = ['extralarge', 'large', 'medium', 'small'];
-            for (const size of imageSizes) {
-                const image = Array.isArray(images) ? 
-                    images.find(img => img.size === size) : 
-                    images[size];
-                
-                if (image && image['#text']) {
-                    return image['#text'];
-                }
-            }
-            
-            return 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300';
-        }
-
         // Загрузка новых релизов
         async function loadNewReleases() {
             const container = document.getElementById('newTracksGrid');
@@ -2505,7 +2144,9 @@
             container.innerHTML = '<div class="loading">Загрузка новых релизов...</div>';
             
             try {
-                const tracks = await getNewReleases();
+                const response = await fetch(`/api/tracks/new`);
+                const tracks = await response.json();
+                
                 displayTracks(tracks, 'newTracksGrid');
             } catch (error) {
                 console.error('Error loading new releases:', error);
@@ -2520,7 +2161,9 @@
             container.innerHTML = '<div class="loading">Загрузка популярных треков...</div>';
             
             try {
-                const tracks = await getPopularTracks();
+                const response = await fetch(`/api/tracks/popular`);
+                const tracks = await response.json();
+                
                 displayTracks(tracks, 'popularTracksGrid');
             } catch (error) {
                 console.error('Error loading popular tracks:', error);
@@ -2557,17 +2200,8 @@
             container.innerHTML = '<div class="loading">Поиск...</div>';
             
             try {
-                let results = [];
-                
-                if (searchState.searchType === 'tracks') {
-                    results = await searchTracks(query);
-                } else if (searchState.searchType === 'artists') {
-                    results = await searchArtists(query);
-                } else if (searchState.searchType === 'albums') {
-                    results = await searchAlbums(query);
-                } else if (searchState.searchType === 'recent') {
-                    results = await getRecentTracks(query);
-                }
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${searchState.searchType}`);
+                const results = await response.json();
                 
                 displaySearchResults(results);
             } catch (error) {
@@ -2673,11 +2307,15 @@
             
             try {
                 // Загружаем информацию об артисте
-                const [info, tracks, albums] = await Promise.all([
-                    getArtistInfo(artistName),
-                    getRecentTracks(artistName),
-                    getArtistAlbums(artistName)
+                const [infoResponse, tracksResponse, albumsResponse] = await Promise.all([
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/info`),
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/tracks`),
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/albums`)
                 ]);
+                
+                const info = await infoResponse.json();
+                const tracks = await tracksResponse.json();
+                const albums = await albumsResponse.json();
                 
                 displayArtistDetails(info, tracks, albums);
             } catch (error) {
@@ -3012,18 +2650,21 @@
                 return;
             }
             
-            container.innerHTML = '<div class="loading">Загрузка текста...</div>';
-            
             try {
-                const lyrics = await getLyrics(track.artist, track.name);
+                // Пытаемся получить текст с Genius API через бэкенд
+                const response = await fetch(`/api/lyrics?artist=${encodeURIComponent(track.artist)}&title=${encodeURIComponent(track.name)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
                 
-                if (lyrics) {
-                    lyricsCache[track.id] = lyrics;
-                    displayLyrics(lyrics);
+                if (data.lyrics) {
+                    lyricsCache[track.id] = data.lyrics;
+                    displayLyrics(data.lyrics);
                 } else {
                     container.innerHTML = `
                         <div class="lyrics-error">
-                            Текст песни не найден
+                            Lyrics not found for this track
                         </div>
                     `;
                 }
@@ -3031,7 +2672,7 @@
                 console.error('Error loading lyrics:', error);
                 container.innerHTML = `
                     <div class="lyrics-error">
-                        Ошибка загрузки текста. Пожалуйста, попробуйте позже.
+                        Failed to load lyrics. Please try again later.
                     </div>
                 `;
             }
@@ -3044,7 +2685,7 @@
             if (!lyrics || lyrics.trim() === '') {
                 container.innerHTML = `
                     <div class="lyrics-error">
-                        Текст песни недоступен для этого трека
+                        No lyrics available for this track
                     </div>
                 `;
                 return;
