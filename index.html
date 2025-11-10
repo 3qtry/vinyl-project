@@ -2112,9 +2112,13 @@
 
     <script>
         // API Keys
-        const LASTFM_API_KEY = "5058e4076992e4688bb4104b252aaed7";
-        const GENIUS_API_KEY = "a5ox7Baa789j7qMf5JP8zBRs5qdT5WjkzOL_NRj07Qt8aEr7UZww-NKNZo-lhu-G";
+        const LASTFM_API_KEY = "db2558b6b29cea4b64b07193610a82e1";
+        const DISCOGS_API_KEY = "ySEdzhEYfaLHScCPjXNzGFjxmzBHoOAFKZzMFIXg";
+        const GENIUS_API_KEY = "B-nxL4rAb8qsAlj9M05KlcM0nKUgxOOqCjkoaRb0PwJDzrBN8Rz-DzXv8QJaxyj8";
         const LASTFM_BASE_URL = 'https://ws.audioscrobbler.com/2.0/';
+
+        // CORS Proxy для обхода ограничений браузера
+        const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
         // Глобальные переменные
         let currentTrack = null;
@@ -2142,6 +2146,21 @@
             searchType: 'tracks'
         };
 
+        // Функция для выполнения запросов с CORS proxy
+        async function fetchWithCors(url, options = {}) {
+            try {
+                const response = await fetch(CORS_PROXY + url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                console.error('CORS proxy error, trying direct fetch:', error);
+                // Если прокси не работает, пробуем прямой запрос
+                return fetch(url, options);
+            }
+        }
+
         // Last.fm API функции
         async function lastfmRequest(params) {
             const searchParams = new URLSearchParams({
@@ -2151,7 +2170,7 @@
             });
             
             const url = `${LASTFM_BASE_URL}?${searchParams}`;
-            const response = await fetch(url);
+            const response = await fetchWithCors(url);
             return response.json();
         }
 
@@ -2444,10 +2463,8 @@
         // Получение текста песни через Genius API
         async function getLyrics(artist, title) {
             try {
-                // Используем CORS proxy для обхода ограничений браузера
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
                 const searchUrl = `https://api.genius.com/search?q=${encodeURIComponent(artist)} ${encodeURIComponent(title)}`;
-                const response = await fetch(proxyUrl + encodeURIComponent(searchUrl), {
+                const response = await fetchWithCors(searchUrl, {
                     headers: {
                         'Authorization': `Bearer ${GENIUS_API_KEY}`
                     }
@@ -2457,24 +2474,8 @@
                 
                 if (data.response && data.response.hits && data.response.hits.length > 0) {
                     const song = data.response.hits[0].result;
-                    // Получаем полный текст песни
-                    const songUrl = `https://api.genius.com/songs/${song.id}`;
-                    const songResponse = await fetch(proxyUrl + encodeURIComponent(songUrl), {
-                        headers: {
-                            'Authorization': `Bearer ${GENIUS_API_KEY}`
-                        }
-                    });
-                    
-                    const songData = await songResponse.json();
-                    if (songData.response && songData.response.song && songData.response.song.description && songData.response.song.description.html) {
-                        // Очищаем HTML теги для получения чистого текста
-                        const lyricsText = songData.response.song.description.html
-                            .replace(/<br\s*\/?>/gi, '\n')
-                            .replace(/<[^>]*>/g, '')
-                            .trim();
-                        return lyricsText || `Lyrics for "${song.title}" by ${song.primary_artist.name} are available on Genius.\n\nVisit: ${song.url}`;
-                    }
-                    
+                    // Для получения полного текста нужно делать дополнительный запрос
+                    // Но для простоты вернем информацию о песне
                     return `Lyrics for "${song.title}" by ${song.primary_artist.name} are available on Genius.\n\nVisit: ${song.url}`;
                 }
                 
@@ -2959,8 +2960,6 @@
                 return;
             }
             
-            container.innerHTML = '<div class="lyrics-loading">Загрузка текста...</div>';
-            
             try {
                 const lyrics = await getLyrics(track.artist, track.name);
                 if (lyrics) {
@@ -2969,7 +2968,7 @@
                 } else {
                     container.innerHTML = `
                         <div class="lyrics-error">
-                            Текст песни не найден для этого трека
+                            Lyrics not found for this track
                         </div>
                     `;
                 }
@@ -2977,7 +2976,7 @@
                 console.error('Error loading lyrics:', error);
                 container.innerHTML = `
                     <div class="lyrics-error">
-                        Не удалось загрузить текст песни. Пожалуйста, попробуйте позже.
+                        Failed to load lyrics. Please try again later.
                     </div>
                 `;
             }
@@ -2990,7 +2989,7 @@
             if (!lyrics || lyrics.trim() === '') {
                 container.innerHTML = `
                     <div class="lyrics-error">
-                        Для этого трека нет текста
+                        No lyrics available for this track
                     </div>
                 `;
                 return;
