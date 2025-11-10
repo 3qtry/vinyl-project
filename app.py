@@ -5,13 +5,13 @@ import lyricsgenius
 import os
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-LASTFM_API_KEY = "db2558b6b29cea4b64b07193610a82e1"
-DISCOGS_API_KEY = "ySEdzhEYfaLHScCPjXNzGFjxmzBHoOAFKZzMFIXg"
+LASTFM_API_KEY = "db2558b6b29cea4b4b07193610a82e1"
+DISCOGS_API_KEY = "ySEdzhEYfaLHScCPjXNzGFjxmzBHoOAFKZzMFIXg" 
 GENIUS_API_KEY = "B-nxL4rAb8qsAlj9M05KlcM0nKUgxOOqCjkoaRb0PwJDzrBN8Rz-DzXv8QJaxyj8"
-LASTFM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/'
+LASTFM_BASE_URL = 'https://ws.audioscrobbler.com/2.0/'
 
 # Инициализация Genius API
 genius = lyricsgenius.Genius(GENIUS_API_KEY, timeout=15, retries=3)
@@ -36,7 +36,7 @@ def get_popular_tracks(limit=15):
                 track_info = get_track_info(track['artist']['name'], track['name'])
                 
                 tracks.append({
-                    'id': f"{track['artist']['name']}-{track['name']}",
+                    'id': f"{track['artist']['name']}-{track['name']}".replace(' ', '_'),
                     'name': track['name'],
                     'artist': track['artist']['name'],
                     'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
@@ -53,6 +53,8 @@ def get_popular_tracks(limit=15):
 def get_new_releases(limit=15):
     """Получаем новые релизы"""
     try:
+        # Используем тот же метод что и для популярных треков
+        # так как Last.fm не имеет отдельного метода для новых релизов
         params = {
             'method': 'chart.gettoptracks',
             'api_key': LASTFM_API_KEY,
@@ -70,7 +72,7 @@ def get_new_releases(limit=15):
                 track_info = get_track_info(track['artist']['name'], track['name'])
                 
                 tracks.append({
-                    'id': f"{track['artist']['name']}-{track['name']}",
+                    'id': f"{track['artist']['name']}-{track['name']}".replace(' ', '_'),
                     'name': track['name'],
                     'artist': track['artist']['name'],
                     'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
@@ -105,7 +107,7 @@ def search_tracks(query, limit=20):
                 track_info = get_track_info(track['artist'], track['name'])
                 
                 tracks.append({
-                    'id': f"{track['artist']}-{track['name']}",
+                    'id': f"{track['artist']}-{track['name']}".replace(' ', '_'),
                     'name': track['name'],
                     'artist': track['artist'],
                     'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
@@ -200,7 +202,7 @@ def get_recent_tracks(artist, limit=10):
                 track_info = get_track_info(artist, track['name'])
                 
                 tracks.append({
-                    'id': f"{artist}-{track['name']}",
+                    'id': f"{artist}-{track['name']}".replace(' ', '_'),
                     'name': track['name'],
                     'artist': artist,
                     'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
@@ -337,9 +339,6 @@ def get_track_info(artist, track):
 
 def get_lyrics(artist, title):
     """Получаем текст песни с Genius API"""
-    if GENIUS_API_KEY == "YOUR_GENIUS_API_KEY":
-        return None
-    
     try:
         song = genius.search_song(title, artist)
         if song:
@@ -418,4 +417,5 @@ def serve_static(filename):
     return send_from_directory('.', filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5500)
+    # Для локальной разработки
+    app.run(debug=True, port=5000, host='0.0.0.0')
