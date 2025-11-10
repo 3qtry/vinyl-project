@@ -16,116 +16,76 @@ LASTFM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/'
 # Инициализация Genius API
 genius = lyricsgenius.Genius(GENIUS_API_KEY, timeout=15, retries=3)
 
-# Список жанров для поиска
-GENRES = [
-    'electronic', 'rock', 'hip-hop', 'indie', 'jazz', 'reggae', 
-    'british', 'punk', 'acoustic', 'rnb', 'metal', 'country', 
-    'hardcore', 'blues', 'alternative', 'classical', 'rap'
-]
-
-def get_popular_tracks(genre=None, limit=15):
-    """Получаем популярные треки, с возможностью фильтрации по жанру"""
-    if genre:
-        params = {
-            'method': 'tag.gettoptracks',
-            'tag': genre,
-            'api_key': LASTFM_API_KEY,
-            'format': 'json',
-            'limit': limit
-        }
-    else:
-        params = {
-            'method': 'chart.gettoptracks',
-            'api_key': LASTFM_API_KEY,
-            'format': 'json',
-            'limit': limit
-        }
+def get_popular_tracks(limit=15):
+    """Получаем популярные треки"""
+    params = {
+        'method': 'chart.gettoptracks',
+        'api_key': LASTFM_API_KEY,
+        'format': 'json',
+        'limit': limit
+    }
     
     try:
         response = requests.get(LASTFM_BASE_URL, params=params, timeout=10)
         data = response.json()
         
         tracks = []
-        if genre and 'tracks' in data:
-            track_data = data['tracks']['track']
-        elif not genre and 'tracks' in data:
-            track_data = data['tracks']['track']
-        else:
-            return []
-        
-        for track in track_data:
-            cover_url = get_track_cover(track['artist']['name'], track['name'])
-            track_info = get_track_info(track['artist']['name'], track['name'])
-            
-            tracks.append({
-                'id': f"{track['artist']['name']}-{track['name']}",
-                'name': track['name'],
-                'artist': track['artist']['name'],
-                'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
-                'duration': track_info.get('duration', '3:45'),
-                'url': track_info.get('url', '#'),
-                'listeners': track.get('listeners', '0'),
-                'type': 'track'
-            })
+        if 'tracks' in data and 'track' in data['tracks']:
+            for track in data['tracks']['track']:
+                cover_url = get_track_cover(track['artist']['name'], track['name'])
+                track_info = get_track_info(track['artist']['name'], track['name'])
+                
+                tracks.append({
+                    'id': f"{track['artist']['name']}-{track['name']}",
+                    'name': track['name'],
+                    'artist': track['artist']['name'],
+                    'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
+                    'duration': track_info.get('duration', '3:45'),
+                    'url': track_info.get('url', '#'),
+                    'listeners': track.get('listeners', '0'),
+                    'type': 'track'
+                })
         return tracks
     except Exception as e:
         print(f"Error fetching popular tracks: {e}")
         return []
 
-def get_new_releases(genre=None, limit=15):
-    """Получаем новые релизы (треки) с использованием различных методов Last.fm"""
+def get_new_releases(limit=15):
+    """Получаем новые релизы"""
     try:
-        # Пробуем разные методы для получения новых треков
-        if genre:
-            # Используем метод для получения топ треков по жанру как приближение новых релизов
-            params = {
-                'method': 'tag.gettoptracks',
-                'tag': genre,
-                'api_key': LASTFM_API_KEY,
-                'format': 'json',
-                'limit': limit
-            }
-        else:
-            # Используем глобальные чарты как новые релизы
-            params = {
-                'method': 'chart.gettoptracks',
-                'api_key': LASTFM_API_KEY,
-                'format': 'json',
-                'limit': limit
-            }
+        params = {
+            'method': 'chart.gettoptracks',
+            'api_key': LASTFM_API_KEY,
+            'format': 'json',
+            'limit': limit
+        }
         
         response = requests.get(LASTFM_BASE_URL, params=params, timeout=10)
         data = response.json()
         
         tracks = []
-        if genre and 'tracks' in data:
-            track_data = data['tracks']['track']
-        elif not genre and 'tracks' in data:
-            track_data = data['tracks']['track']
-        else:
-            return []
-        
-        for track in track_data:
-            cover_url = get_track_cover(track['artist']['name'], track['name'])
-            track_info = get_track_info(track['artist']['name'], track['name'])
-            
-            tracks.append({
-                'id': f"{track['artist']['name']}-{track['name']}",
-                'name': track['name'],
-                'artist': track['artist']['name'],
-                'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
-                'duration': track_info.get('duration', '3:45'),
-                'url': track_info.get('url', '#'),
-                'listeners': track.get('listeners', '0'),
-                'type': 'track'
-            })
+        if 'tracks' in data and 'track' in data['tracks']:
+            for track in data['tracks']['track']:
+                cover_url = get_track_cover(track['artist']['name'], track['name'])
+                track_info = get_track_info(track['artist']['name'], track['name'])
+                
+                tracks.append({
+                    'id': f"{track['artist']['name']}-{track['name']}",
+                    'name': track['name'],
+                    'artist': track['artist']['name'],
+                    'image': cover_url or track.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
+                    'duration': track_info.get('duration', '3:45'),
+                    'url': track_info.get('url', '#'),
+                    'listeners': track.get('listeners', '0'),
+                    'type': 'track'
+                })
         return tracks
     except Exception as e:
         print(f"Error fetching new releases: {e}")
         return []
 
-def search_tracks(query, genre=None, limit=20):
-    """Поиск треков с фильтрацией по жанру"""
+def search_tracks(query, limit=20):
+    """Поиск треков"""
     params = {
         'method': 'track.search',
         'api_key': LASTFM_API_KEY,
@@ -141,10 +101,6 @@ def search_tracks(query, genre=None, limit=20):
         tracks = []
         if 'results' in data and 'trackmatches' in data['results']:
             for track in data['results']['trackmatches']['track']:
-                # Если указан жанр, проверяем принадлежность артиста к жанру
-                if genre and not has_genre(track['artist'], genre):
-                    continue
-                    
                 cover_url = get_track_cover(track['artist'], track['name'])
                 track_info = get_track_info(track['artist'], track['name'])
                 
@@ -163,8 +119,8 @@ def search_tracks(query, genre=None, limit=20):
         print(f"Error searching tracks: {e}")
         return []
 
-def search_artists(query, genre=None, limit=10):
-    """Поиск артистов с фильтрацией по жанру"""
+def search_artists(query, limit=10):
+    """Поиск артистов"""
     params = {
         'method': 'artist.search',
         'api_key': LASTFM_API_KEY,
@@ -180,11 +136,6 @@ def search_artists(query, genre=None, limit=10):
         artists = []
         if 'results' in data and 'artistmatches' in data['results']:
             for artist in data['results']['artistmatches']['artist']:
-                # Если указан жанр, проверяем принадлежность артиста к жанру
-                if genre and not has_genre(artist['name'], genre):
-                    continue
-                    
-                # Получаем дополнительную информацию об артисте для количества слушателей
                 artist_info = get_artist_info(artist['name'])
                 
                 artists.append({
@@ -199,64 +150,12 @@ def search_artists(query, genre=None, limit=10):
         print(f"Error searching artists: {e}")
         return []
 
-def search_all(query, genre=None, limit=20):
-    """Объединенный поиск артистов и треков"""
-    artists = search_artists(query, genre, limit=5)
-    tracks = search_tracks(query, genre, limit=15)
-    
-    return {
-        'artists': artists,
-        'tracks': tracks
-    }
-
-def get_artist_info(artist):
-    """Получаем информацию об артисте, включая количество слушателей"""
+def search_albums(query, limit=10):
+    """Поиск альбомов"""
     params = {
-        'method': 'artist.getInfo',
+        'method': 'album.search',
         'api_key': LASTFM_API_KEY,
-        'artist': artist,
-        'format': 'json'
-    }
-    
-    try:
-        response = requests.get(LASTFM_BASE_URL, params=params, timeout=5)
-        data = response.json()
-        
-        if 'artist' in data and data['artist']:
-            return {
-                'listeners': data['artist'].get('stats', {}).get('listeners', '0'),
-                'playcount': data['artist'].get('stats', {}).get('playcount', '0')
-            }
-    except Exception as e:
-        print(f"Error fetching artist info for {artist}: {e}")
-    
-    return {'listeners': '0', 'playcount': '0'}
-
-def has_genre(artist, genre):
-    """Проверяем, относится ли артист к указанному жанру"""
-    try:
-        params = {
-            'method': 'artist.gettoptags',
-            'artist': artist,
-            'api_key': LASTFM_API_KEY,
-            'format': 'json'
-        }
-        response = requests.get(LASTFM_BASE_URL, params=params, timeout=5)
-        data = response.json()
-        
-        if 'toptags' in data and 'tag' in data['toptags']:
-            tags = [tag['name'].lower() for tag in data['toptags']['tag']]
-            return genre.lower() in tags
-        return False
-    except:
-        return False
-
-def get_artists_by_genre(genre, limit=20):
-    """Получаем список артистов по жанру"""
-    params = {
-        'method': 'tag.gettopartists',
-        'tag': genre,
-        'api_key': LASTFM_API_KEY,
+        'album': query,
         'format': 'json',
         'limit': limit
     }
@@ -265,23 +164,23 @@ def get_artists_by_genre(genre, limit=20):
         response = requests.get(LASTFM_BASE_URL, params=params, timeout=10)
         data = response.json()
         
-        artists = []
-        if 'topartists' in data and 'artist' in data['topartists']:
-            for artist in data['topartists']['artist']:
-                artists.append({
-                    'name': artist['name'],
-                    'listeners': artist.get('listeners', '0'),
-                    'url': artist.get('url', '#'),
-                    'image': artist.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
-                    'type': 'artist'
+        albums = []
+        if 'results' in data and 'albummatches' in data['results']:
+            for album in data['results']['albummatches']['album']:
+                albums.append({
+                    'name': album['name'],
+                    'artist': album['artist'],
+                    'url': album.get('url', '#'),
+                    'image': album.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
+                    'type': 'album'
                 })
-        return artists
+        return albums
     except Exception as e:
-        print(f"Error fetching artists by genre: {e}")
+        print(f"Error searching albums: {e}")
         return []
 
-def get_artist_tracks(artist, limit=15):
-    """Получаем треки артиста"""
+def get_recent_tracks(artist, limit=10):
+    """Получаем последние треки артиста"""
     params = {
         'method': 'artist.gettoptracks',
         'artist': artist,
@@ -312,8 +211,73 @@ def get_artist_tracks(artist, limit=15):
                 })
         return tracks
     except Exception as e:
-        print(f"Error fetching artist tracks: {e}")
+        print(f"Error fetching recent tracks: {e}")
         return []
+
+def get_artist_albums(artist, limit=10):
+    """Получаем альбомы артиста"""
+    params = {
+        'method': 'artist.gettopalbums',
+        'artist': artist,
+        'api_key': LASTFM_API_KEY,
+        'format': 'json',
+        'limit': limit
+    }
+    
+    try:
+        response = requests.get(LASTFM_BASE_URL, params=params, timeout=10)
+        data = response.json()
+        
+        albums = []
+        if 'topalbums' in data and 'album' in data['topalbums']:
+            for album in data['topalbums']['album']:
+                albums.append({
+                    'name': album['name'],
+                    'artist': artist,
+                    'url': album.get('url', '#'),
+                    'image': album.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
+                    'playcount': album.get('playcount', '0'),
+                    'type': 'album'
+                })
+        return albums
+    except Exception as e:
+        print(f"Error fetching artist albums: {e}")
+        return []
+
+def get_artist_info(artist):
+    """Получаем информацию об артисте"""
+    params = {
+        'method': 'artist.getInfo',
+        'api_key': LASTFM_API_KEY,
+        'artist': artist,
+        'format': 'json'
+    }
+    
+    try:
+        response = requests.get(LASTFM_BASE_URL, params=params, timeout=5)
+        data = response.json()
+        
+        if 'artist' in data and data['artist']:
+            artist_data = data['artist']
+            return {
+                'name': artist_data.get('name', ''),
+                'listeners': artist_data.get('stats', {}).get('listeners', '0'),
+                'playcount': artist_data.get('stats', {}).get('playcount', '0'),
+                'bio': artist_data.get('bio', {}).get('summary', ''),
+                'image': artist_data.get('image', [{}])[-1].get('#text', 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'),
+                'tags': [tag['name'] for tag in artist_data.get('tags', {}).get('tag', [])][:5]
+            }
+    except Exception as e:
+        print(f"Error fetching artist info for {artist}: {e}")
+    
+    return {
+        'name': artist,
+        'listeners': '0',
+        'playcount': '0',
+        'bio': '',
+        'image': 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300',
+        'tags': []
+    }
 
 def get_track_cover(artist, track_name):
     """Получаем обложку из Discogs"""
@@ -359,7 +323,6 @@ def get_track_info(artist, track):
         if 'track' in data and data['track']:
             duration = data['track'].get('duration', '-')
             if duration != '-':
-                # Конвертируем миллисекунды в минуты:секунды
                 minutes = int(int(duration) // 60000)
                 seconds = int((int(duration) % 60000) // 1000)
                 duration = f"{minutes}:{seconds:02d}"
@@ -378,7 +341,6 @@ def get_lyrics(artist, title):
         return None
     
     try:
-        # Поиск песни
         song = genius.search_song(title, artist)
         if song:
             return song.lyrics
@@ -390,40 +352,49 @@ def get_lyrics(artist, title):
 # API Endpoints
 @app.route('/api/tracks/popular')
 def get_popular_tracks_route():
-    genre = request.args.get('genre', '')
-    tracks = get_popular_tracks(genre if genre != 'all' else None)
+    tracks = get_popular_tracks()
     return jsonify(tracks)
 
 @app.route('/api/tracks/new')
 def get_new_releases_route():
-    genre = request.args.get('genre', '')
-    tracks = get_new_releases(genre if genre != 'all' else None)
+    tracks = get_new_releases()
     return jsonify(tracks)
 
 @app.route('/api/search')
-def search_tracks_route():
+def search_route():
     query = request.args.get('q', '')
-    genre = request.args.get('genre', '')
+    search_type = request.args.get('type', 'tracks')
     
     if not query:
-        return jsonify({'artists': [], 'tracks': []})
+        return jsonify([])
     
-    results = search_all(query, genre if genre != 'all' else None)
+    if search_type == 'tracks':
+        results = search_tracks(query)
+    elif search_type == 'artists':
+        results = search_artists(query)
+    elif search_type == 'albums':
+        results = search_albums(query)
+    elif search_type == 'recent':
+        results = get_recent_tracks(query)
+    else:
+        results = []
+    
     return jsonify(results)
 
-@app.route('/api/artists/<genre>')
-def get_artists_by_genre_route(genre):
-    artists = get_artists_by_genre(genre)
-    return jsonify(artists)
+@app.route('/api/artist/<artist>/info')
+def get_artist_info_route(artist):
+    info = get_artist_info(artist)
+    return jsonify(info)
 
 @app.route('/api/artist/<artist>/tracks')
 def get_artist_tracks_route(artist):
-    tracks = get_artist_tracks(artist)
+    tracks = get_recent_tracks(artist)
     return jsonify(tracks)
 
-@app.route('/api/genres')
-def get_genres_route():
-    return jsonify(GENRES)
+@app.route('/api/artist/<artist>/albums')
+def get_artist_albums_route(artist):
+    albums = get_artist_albums(artist)
+    return jsonify(albums)
 
 @app.route('/api/lyrics')
 def get_lyrics_route():

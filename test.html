@@ -301,8 +301,8 @@
             display: flex;
         }
 
-        /* Стили для контейнера жанров */
-        .genres-container {
+        /* Стили для фильтров поиска */
+        .search-filters {
             display: flex;
             gap: 0.75rem;
             overflow-x: auto;
@@ -313,21 +313,21 @@
             flex-shrink: 0;
         }
 
-        .genres-container::-webkit-scrollbar {
+        .search-filters::-webkit-scrollbar {
             height: 6px;
         }
 
-        .genres-container::-webkit-scrollbar-track {
+        .search-filters::-webkit-scrollbar-track {
             background: var(--glass);
             border-radius: 3px;
         }
 
-        .genres-container::-webkit-scrollbar-thumb {
+        .search-filters::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 3px;
         }
 
-        .genre-tab {
+        .search-filter {
             background: var(--glass);
             color: var(--text);
             border: 1px solid var(--border);
@@ -341,13 +341,13 @@
             flex-shrink: 0;
         }
 
-        .genre-tab:hover {
+        .search-filter:hover {
             background: var(--primary);
             color: white;
             transform: translateY(-2px);
         }
 
-        .genre-tab.active {
+        .search-filter.active {
             background: var(--primary);
             color: white;
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
@@ -400,6 +400,149 @@
         .artist-listeners {
             color: color-mix(in srgb, var(--text) 60%, transparent);
             font-size: 0.8rem;
+        }
+
+        /* Стили для карточки артиста */
+        .artist-card {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .artist-header {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .artist-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .artist-details {
+            flex: 1;
+        }
+
+        .artist-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .artist-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .artist-stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: color-mix(in srgb, var(--text) 60%, transparent);
+        }
+
+        .artist-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .artist-tag {
+            background: var(--glass);
+            color: var(--text);
+            padding: 0.3rem 0.7rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .artist-bio {
+            color: color-mix(in srgb, var(--text) 80%, transparent);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .artist-bio::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(transparent, var(--card));
+        }
+
+        /* Стили для альбомов */
+        .albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .album-item {
+            background: var(--glass);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--border);
+        }
+
+        .album-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .album-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .album-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .album-artist {
+            color: color-mix(in srgb, var(--text) 70%, transparent);
+            font-size: 0.85rem;
+        }
+
+        .album-plays {
+            color: color-mix(in srgb, var(--text) 60%, transparent);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
         }
 
         /* Навигация в поиске */
@@ -460,23 +603,6 @@
 
         .search-input::placeholder {
             color: color-mix(in srgb, var(--text) 50%, transparent);
-        }
-
-        .tracks-header {
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .tracks-title {
-            font-size: 1.3rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .tracks-subtitle {
-            color: color-mix(in srgb, var(--text) 70%, transparent);
-            font-size: 0.9rem;
-            font-weight: 400;
         }
 
         .search-results-container {
@@ -1533,11 +1659,24 @@
                 grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             }
 
-            .genres-container {
+            .albums-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .artist-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .artist-stats {
+                justify-content: center;
+            }
+
+            .search-filters {
                 gap: 0.5rem;
             }
 
-            .genre-tab {
+            .search-filter {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.8rem;
             }
@@ -1598,9 +1737,6 @@
                 
                 <!-- Вкладка новых релизов -->
                 <div class="tab-content active" id="newTab">
-                    <div class="genres-container" id="newGenres">
-                        <!-- Жанры будут загружены через JavaScript -->
-                    </div>
                     <div class="tracks-grid" id="newTracksGrid">
                         <div class="loading">Загрузка новых релизов...</div>
                     </div>
@@ -1608,9 +1744,6 @@
 
                 <!-- Вкладка популярных треков -->
                 <div class="tab-content" id="popularTab">
-                    <div class="genres-container" id="popularGenres">
-                        <!-- Жанры будут загружены через JavaScript -->
-                    </div>
                     <div class="tracks-grid" id="popularTracksGrid">
                         <div class="loading">Загрузка популярных треков...</div>
                     </div>
@@ -1627,17 +1760,20 @@
                         >
                     </div>
                     
+                    <div class="search-filters" id="searchFilters">
+                        <button class="search-filter active" data-type="tracks" onclick="setSearchType('tracks')">Треки</button>
+                        <button class="search-filter" data-type="artists" onclick="setSearchType('artists')">Артисты</button>
+                        <button class="search-filter" data-type="albums" onclick="setSearchType('albums')">Альбомы</button>
+                        <button class="search-filter" data-type="recent" onclick="setSearchType('recent')">Свежее</button>
+                    </div>
+                    
                     <div class="search-navigation" id="searchNav">
                         <button class="nav-btn" onclick="goBackInSearch()">← Назад</button>
                         <span class="nav-title" id="searchNavTitle"></span>
                     </div>
                     
-                    <div class="genres-container" id="searchGenres">
-                        <!-- Жанры будут загружены через JavaScript -->
-                    </div>
-                    
                     <div class="search-results-container" id="searchResultsContainer">
-                        <div class="loading">Введите запрос для поиска или выберите жанр</div>
+                        <div class="loading">Введите запрос для поиска</div>
                     </div>
                 </div>
             </div>
@@ -1994,68 +2130,12 @@
             relevance: 0
         };
 
-        // Новые переменные для жанров и поиска
-        let currentGenres = {
-            new: 'all',
-            popular: 'all',
-            search: 'all'
-        };
-
+        // Переменные для поиска
         let searchState = {
-            mode: 'search', // 'search', 'artists', 'tracks'
-            currentGenre: 'all',
-            currentArtist: null
+            mode: 'search', // 'search', 'artist'
+            currentArtist: null,
+            searchType: 'tracks' // 'tracks', 'artists', 'albums', 'recent'
         };
-
-        // Загрузка жанров
-        async function loadGenres() {
-            try {
-                const response = await fetch('/api/genres');
-                const genres = await response.json();
-                
-                // Добавляем опцию "Все жанры"
-                const allGenres = ['all', ...genres];
-                
-                // Создаем элементы жанров для каждой вкладки
-                ['new', 'popular', 'search'].forEach(tab => {
-                    const container = document.getElementById(`${tab}Genres`);
-                    container.innerHTML = '';
-                    
-                    allGenres.forEach(genre => {
-                        const genreElement = document.createElement('button');
-                        genreElement.className = `genre-tab ${currentGenres[tab] === genre ? 'active' : ''}`;
-                        genreElement.textContent = genre === 'all' ? 'Все жанры' : genre;
-                        genreElement.setAttribute('data-genre', genre);
-                        genreElement.addEventListener('click', () => selectGenre(tab, genre));
-                        container.appendChild(genreElement);
-                    });
-                });
-            } catch (error) {
-                console.error('Error loading genres:', error);
-            }
-        }
-
-        // Выбор жанра
-        function selectGenre(tab, genre) {
-            currentGenres[tab] = genre;
-            
-            // Обновляем активные жанры
-            document.querySelectorAll(`#${tab}Genres .genre-tab`).forEach(element => {
-                element.classList.toggle('active', element.getAttribute('data-genre') === genre);
-            });
-            
-            // Загружаем соответствующие треки
-            if (tab === 'new') {
-                loadNewReleases();
-            } else if (tab === 'popular') {
-                loadPopularTracks();
-            } else if (tab === 'search') {
-                // В поиске при выборе жанра показываем артистов этого жанра
-                if (searchState.mode === 'search') {
-                    loadArtistsByGenre(genre);
-                }
-            }
-        }
 
         // Загрузка новых релизов
         async function loadNewReleases() {
@@ -2064,8 +2144,7 @@
             container.innerHTML = '<div class="loading">Загрузка новых релизов...</div>';
             
             try {
-                const genre = currentGenres.new === 'all' ? '' : currentGenres.new;
-                const response = await fetch(`/api/tracks/new?genre=${genre}`);
+                const response = await fetch(`/api/tracks/new`);
                 const tracks = await response.json();
                 
                 displayTracks(tracks, 'newTracksGrid');
@@ -2082,8 +2161,7 @@
             container.innerHTML = '<div class="loading">Загрузка популярных треков...</div>';
             
             try {
-                const genre = currentGenres.popular === 'all' ? '' : currentGenres.popular;
-                const response = await fetch(`/api/tracks/popular?genre=${genre}`);
+                const response = await fetch(`/api/tracks/popular`);
                 const tracks = await response.json();
                 
                 displayTracks(tracks, 'popularTracksGrid');
@@ -2093,29 +2171,39 @@
             }
         }
 
-        // Расширенный поиск
+        // Установка типа поиска
+        function setSearchType(type) {
+            searchState.searchType = type;
+            
+            // Обновляем активные фильтры
+            document.querySelectorAll('#searchFilters .search-filter').forEach(filter => {
+                filter.classList.toggle('active', filter.getAttribute('data-type') === type);
+            });
+            
+            // Выполняем поиск если есть запрос
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                performSearch();
+            }
+        }
+
+        // Выполнение поиска
         async function performSearch() {
             const query = document.getElementById('searchInput').value.trim();
             const container = document.getElementById('searchResultsContainer');
             
             if (!query) {
-                // Если запрос пустой, но выбран жанр - показываем артистов
-                if (currentGenres.search !== 'all') {
-                    loadArtistsByGenre(currentGenres.search);
-                } else {
-                    resetSearch();
-                }
+                container.innerHTML = '<div class="loading">Введите запрос для поиска</div>';
                 return;
             }
             
             container.innerHTML = '<div class="loading">Поиск...</div>';
             
             try {
-                const genre = currentGenres.search === 'all' ? '' : currentGenres.search;
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&genre=${genre}`);
-                const data = await response.json();
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=${searchState.searchType}`);
+                const results = await response.json();
                 
-                displaySearchResults(data);
+                displaySearchResults(results);
             } catch (error) {
                 console.error('Error searching:', error);
                 container.innerHTML = '<div class="error-message">Ошибка поиска</div>';
@@ -2123,104 +2211,26 @@
         }
 
         // Отображение результатов поиска
-        function displaySearchResults(data) {
+        function displaySearchResults(results) {
             const container = document.getElementById('searchResultsContainer');
             container.innerHTML = '';
             
             // Скрываем навигацию в обычном поиске
             document.getElementById('searchNav').style.display = 'none';
             
-            let hasContent = false;
-            
-            // Отображаем артистов
-            if (data.artists && data.artists.length > 0) {
-                hasContent = true;
-                const artistsSection = document.createElement('div');
-                artistsSection.className = 'search-section';
-                artistsSection.innerHTML = '<div class="search-section-title">Артисты</div>';
-                
-                const artistsGrid = document.createElement('div');
-                artistsGrid.className = 'artist-grid';
-                
-                data.artists.forEach(artist => {
-                    const artistElement = document.createElement('div');
-                    artistElement.className = 'artist-item';
-                    artistElement.innerHTML = `
-                        <img src="${artist.image}" alt="${artist.name}" class="artist-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
-                        <div class="artist-name">${artist.name}</div>
-                        <div class="artist-listeners">${formatListeners(artist.listeners)} слушателей</div>
-                    `;
-                    
-                    artistElement.addEventListener('click', () => loadArtistTracks(artist.name));
-                    artistsGrid.appendChild(artistElement);
-                });
-                
-                artistsSection.appendChild(artistsGrid);
-                container.appendChild(artistsSection);
-            }
-            
-            // Отображаем треки
-            if (data.tracks && data.tracks.length > 0) {
-                hasContent = true;
-                const tracksSection = document.createElement('div');
-                tracksSection.className = 'search-section';
-                tracksSection.innerHTML = '<div class="search-section-title">Треки</div>';
-                
-                const tracksGrid = document.createElement('div');
-                tracksGrid.className = 'tracks-grid';
-                
-                data.tracks.forEach(track => {
-                    const trackElement = document.createElement('div');
-                    trackElement.className = 'track-item';
-                    trackElement.setAttribute('data-track-id', track.id);
-                    trackElement.innerHTML = `
-                        <img src="${track.image}" 
-                             alt="${track.name}" 
-                             class="track-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
-                        <div class="track-info">
-                            <div class="track-name">${track.name}</div>
-                            <div class="track-artist">${track.artist}</div>
-                        </div>
-                        <span class="track-type">Трек</span>
-                        <div class="track-duration">${track.duration}</div>
-                    `;
-                    
-                    trackElement.addEventListener('click', () => selectTrack(track));
-                    tracksGrid.appendChild(trackElement);
-                });
-                
-                tracksSection.appendChild(tracksGrid);
-                container.appendChild(tracksSection);
-            }
-            
-            if (!hasContent) {
+            if (!results || results.length === 0) {
                 container.innerHTML = '<div class="empty-state">Ничего не найдено</div>';
+                return;
             }
-        }
-
-        // Загрузка артистов по жанру
-        async function loadArtistsByGenre(genre) {
-            const container = document.getElementById('searchResultsContainer');
             
-            container.innerHTML = '<div class="loading">Загрузка артистов...</div>';
-            
-            // Обновляем навигацию
-            document.getElementById('searchNav').style.display = 'flex';
-            document.getElementById('searchNavTitle').textContent = `Жанр: ${genre}`;
-            
-            searchState.mode = 'artists';
-            searchState.currentGenre = genre;
-            
-            try {
-                const response = await fetch(`/api/artists/${genre}`);
-                const artists = await response.json();
-                
-                displayArtists(artists);
-            } catch (error) {
-                console.error('Error loading artists:', error);
-                container.innerHTML = '<div class="error-message">Ошибка загрузки артистов</div>';
+            if (searchState.searchType === 'tracks') {
+                displayTracks(results, 'searchResultsContainer', true);
+            } else if (searchState.searchType === 'artists') {
+                displayArtists(results);
+            } else if (searchState.searchType === 'albums') {
+                displayAlbums(results);
+            } else if (searchState.searchType === 'recent') {
+                displayTracks(results, 'searchResultsContainer', true);
             }
         }
 
@@ -2232,8 +2242,6 @@
                 container.innerHTML = '<div class="empty-state">Артисты не найдены</div>';
                 return;
             }
-            
-            container.innerHTML = '';
             
             const artistsGrid = document.createElement('div');
             artistsGrid.className = 'artist-grid';
@@ -2248,42 +2256,157 @@
                     <div class="artist-listeners">${formatListeners(artist.listeners)} слушателей</div>
                 `;
                 
-                artistElement.addEventListener('click', () => loadArtistTracks(artist.name));
+                artistElement.addEventListener('click', () => loadArtistDetails(artist.name));
                 artistsGrid.appendChild(artistElement);
             });
             
             container.appendChild(artistsGrid);
         }
 
-        // Загрузка треков артиста
-        async function loadArtistTracks(artistName) {
+        // Отображение альбомов
+        function displayAlbums(albums) {
             const container = document.getElementById('searchResultsContainer');
             
-            container.innerHTML = '<div class="loading">Загрузка треков...</div>';
+            if (!albums || albums.length === 0) {
+                container.innerHTML = '<div class="empty-state">Альбомы не найдены</div>';
+                return;
+            }
+            
+            const albumsGrid = document.createElement('div');
+            albumsGrid.className = 'albums-grid';
+            
+            albums.forEach(album => {
+                const albumElement = document.createElement('div');
+                albumElement.className = 'album-item';
+                albumElement.innerHTML = `
+                    <img src="${album.image}" alt="${album.name}" class="album-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                    <div class="album-name">${album.name}</div>
+                    <div class="album-artist">${album.artist}</div>
+                    ${album.playcount ? `<div class="album-plays">${formatListeners(album.playcount)} прослушиваний</div>` : ''}
+                `;
+                
+                albumsGrid.appendChild(albumElement);
+            });
+            
+            container.appendChild(albumsGrid);
+        }
+
+        // Загрузка детальной информации об артисте
+        async function loadArtistDetails(artistName) {
+            const container = document.getElementById('searchResultsContainer');
+            
+            container.innerHTML = '<div class="loading">Загрузка информации об артисте...</div>';
             
             // Обновляем навигацию
+            document.getElementById('searchNav').style.display = 'flex';
             document.getElementById('searchNavTitle').textContent = `Артист: ${artistName}`;
             
-            searchState.mode = 'tracks';
+            searchState.mode = 'artist';
             searchState.currentArtist = artistName;
             
             try {
-                const response = await fetch(`/api/artist/${encodeURIComponent(artistName)}/tracks`);
-                const tracks = await response.json();
+                // Загружаем информацию об артисте
+                const [infoResponse, tracksResponse, albumsResponse] = await Promise.all([
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/info`),
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/tracks`),
+                    fetch(`/api/artist/${encodeURIComponent(artistName)}/albums`)
+                ]);
                 
-                displayTracks(tracks, 'searchResultsContainer', true);
+                const info = await infoResponse.json();
+                const tracks = await tracksResponse.json();
+                const albums = await albumsResponse.json();
+                
+                displayArtistDetails(info, tracks, albums);
             } catch (error) {
-                console.error('Error loading artist tracks:', error);
-                container.innerHTML = '<div class="error-message">Ошибка загрузки треков артиста</div>';
+                console.error('Error loading artist details:', error);
+                container.innerHTML = '<div class="error-message">Ошибка загрузки информации об артисте</div>';
+            }
+        }
+
+        // Отображение детальной информации об артисте
+        function displayArtistDetails(artistInfo, tracks, albums) {
+            const container = document.getElementById('searchResultsContainer');
+            
+            let html = `
+                <div class="artist-card">
+                    <div class="artist-header">
+                        <img src="${artistInfo.image}" alt="${artistInfo.name}" class="artist-avatar"
+                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                        <div class="artist-details">
+                            <h1 class="artist-title">${artistInfo.name}</h1>
+                            <div class="artist-stats">
+                                <div class="artist-stat">
+                                    <div class="stat-value">${formatListeners(artistInfo.listeners)}</div>
+                                    <div class="stat-label">Слушателей</div>
+                                </div>
+                                <div class="artist-stat">
+                                    <div class="stat-value">${formatListeners(artistInfo.playcount)}</div>
+                                    <div class="stat-label">Прослушиваний</div>
+                                </div>
+                            </div>
+                            ${artistInfo.tags && artistInfo.tags.length > 0 ? `
+                                <div class="artist-tags">
+                                    ${artistInfo.tags.map(tag => `<span class="artist-tag">${tag}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ${artistInfo.bio ? `
+                        <div class="artist-bio">
+                            ${artistInfo.bio}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Добавляем популярные треки
+            if (tracks && tracks.length > 0) {
+                html += `
+                    <div class="search-section">
+                        <div class="search-section-title">Популярные треки</div>
+                        <div class="tracks-grid" id="artistTracksGrid"></div>
+                    </div>
+                `;
+            }
+            
+            // Добавляем альбомы
+            if (albums && albums.length > 0) {
+                html += `
+                    <div class="search-section">
+                        <div class="search-section-title">Альбомы</div>
+                        <div class="albums-grid" id="artistAlbumsGrid"></div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            
+            // Отображаем треки и альбомы
+            if (tracks && tracks.length > 0) {
+                displayTracks(tracks, 'artistTracksGrid', true);
+            }
+            
+            if (albums && albums.length > 0) {
+                const albumsGrid = document.getElementById('artistAlbumsGrid');
+                albums.forEach(album => {
+                    const albumElement = document.createElement('div');
+                    albumElement.className = 'album-item';
+                    albumElement.innerHTML = `
+                        <img src="${album.image}" alt="${album.name}" class="album-image"
+                             onerror="this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300'">
+                        <div class="album-name">${album.name}</div>
+                        <div class="album-artist">${album.artist}</div>
+                        ${album.playcount ? `<div class="album-plays">${formatListeners(album.playcount)} прослушиваний</div>` : ''}
+                    `;
+                    albumsGrid.appendChild(albumElement);
+                });
             }
         }
 
         // Назад в поиске
         function goBackInSearch() {
-            if (searchState.mode === 'tracks') {
-                // Возвращаемся к артистам
-                loadArtistsByGenre(searchState.currentGenre);
-            } else if (searchState.mode === 'artists') {
+            if (searchState.mode === 'artist') {
                 // Возвращаемся к обычному поиску
                 resetSearch();
             }
@@ -2293,12 +2416,15 @@
         function resetSearch() {
             searchState = {
                 mode: 'search',
-                currentGenre: 'all',
-                currentArtist: null
+                currentArtist: null,
+                searchType: 'tracks'
             };
             
             document.getElementById('searchNav').style.display = 'none';
-            document.getElementById('searchResultsContainer').innerHTML = '<div class="loading">Введите запрос для поиска или выберите жанр</div>';
+            document.getElementById('searchResultsContainer').innerHTML = '<div class="loading">Введите запрос для поиска</div>';
+            
+            // Сбрасываем фильтры
+            setSearchType('tracks');
         }
 
         // Форматирование количества слушателей
@@ -2944,9 +3070,6 @@
             
             // Инициализируем слайдеры оценки
             initRatingSliders();
-            
-            // Загружаем жанры
-            loadGenres();
             
             // Загружаем начальные данные
             loadNewReleases();
